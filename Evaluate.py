@@ -64,9 +64,9 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./model/Ped2_reconstruction_model.pth', help='directory of model')
+                    default='./trained_model/Ped2_reconstruction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./model/Ped2_reconstruction_keys.pt', help='directory of model')
+                    default='./trained_model/Ped2_reconstruction_keys.pt', help='directory of model')
 
 args = parser.parse_args()
 

@@ -3,3 +3,4 @@ exp
 trained_model
 .vscode
 sandbox-test
+__pycache__
