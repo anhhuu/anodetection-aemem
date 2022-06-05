@@ -45,7 +45,7 @@ parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
 parser.add_argument('--lr', type=float, default=2e-4,
                     help='initial learning rate')
-parser.add_argument('--method', type=str, default='recon',
+parser.add_argument('--method', type=str, default='recons',
                     help='The target task for anoamly detection')
 parser.add_argument('--t_length', type=int, default=1,
                     help='length of the frame sequences')
@@ -103,7 +103,7 @@ test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
 
 
 # Model setting
-assert args.method == 'pred' or args.method == 'recon', 'Wrong task name'
+assert args.method == 'pred' or args.method == 'recons', 'Wrong task name'
 if args.method == 'pred':
     from model.final_future_prediction_with_memory_spatial_sumonly_weight_ranking_top1 import *
     model = convAE(args.c, args.t_length, args.msize, args.fdim, args.mdim)
