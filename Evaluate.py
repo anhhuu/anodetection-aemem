@@ -215,10 +215,25 @@ for k, (imgs) in enumerate(test_batch):
 anomaly_score_total_list = []
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
-    anomaly_score_total_list += score_sum(anomaly_score_list(psnr_list[video_name]),
-                                          anomaly_score_list_inv(feature_distance_list[video_name]), args.alpha)
+
+    PSNR_list = psnr_list[video_name]
+    # min-max normalization for PSNR
+    Anomaly_score_list = anomaly_score_list(PSNR_list)
+
+    Feature_distance_list = feature_distance_list[video_name]
+    # min-max normalization for compactness loss
+    Anomaly_score_list_inv = anomaly_score_list_inv(Feature_distance_list)
+
+    # Sum score for anomaly rate
+    score = score_sum(Anomaly_score_list, Anomaly_score_list_inv, args.alpha)
+
+    # Append score to total list
+    anomaly_score_total_list += score
 
 anomaly_score_total_list = np.asarray(anomaly_score_total_list)
+
+for i in range(len(anomaly_score_total_list)):
+    print(i, ": ", anomaly_score_total_list[i])
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
 
