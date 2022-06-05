@@ -4,7 +4,7 @@ Anomaly detection using autoencoder and memory module.
 
 #### Dataset
 
--   [[download directly]](https://github.com/StevenLiuWen/ano_pred_cvpr2018)
+-   [[download directly]](http://101.32.75.151:8181/dataset/)
 -   [[description]](https://github.com/StevenLiuWen/ano_pred_cvpr2018)
 
 #### Trained model
