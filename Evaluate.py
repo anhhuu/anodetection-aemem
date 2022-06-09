@@ -41,9 +41,9 @@ parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--method', type=str, default='recons',
+parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=1,
+parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--fdim', type=int, default=512,
                     help='channel dimension of the features')
@@ -85,26 +85,34 @@ torch.backends.cudnn.enabled = True
 
 test_folder = args.dataset_path+"/"+args.dataset_type+"/testing/frames"
 
-# Loading dataset
-test_dataset = DataLoader(test_folder, transforms.Compose([
-    transforms.ToTensor(),
-]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
-
+# load the dataset and convert a ndarray image/frame into a float tensor. Then scale the image/frame
+# pixel intensity value in the range [-1, 1]
+test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(), ]),
+                          resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+# dataset length
 test_size = len(test_dataset)
 
+# load data into mini test batch with batch_size:
+#   + test_dataset: loader dataset
+#   + batch_size: size of mini batch
+#   + shuffle: not shuffle due to sequential data
+#   + num_workers: how many subprocesses to use for data loading
+#   + drop_last: If the size of dataset is not divisible by the batch size, then the last batch will be smaller
 test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
                              shuffle=False, num_workers=args.num_workers_test, drop_last=False)
 
+# define Mean Error Loss
 loss_func_mse = nn.MSELoss(reduction='none')
 
 # Loading the trained model
 model = torch.load(args.model_dir)
 model.cuda()
 m_items = torch.load(args.m_items_dir)
+# load labels file of dataset
 labels = np.load('./data/frame_labels_'+args.dataset_type+'.npy')
 
-videos = OrderedDict()
-# './dataset/ped2/testing/frames/01'; .../02; ...
+# Setup a list contain video segments, element in the list contain all frames of this video segment.
+videos = OrderedDict()  # './dataset/ped2/testing/frames/01'; .../02; ...
 videos_list = sorted(glob.glob(os.path.join(test_folder, '*')))
 for video in videos_list:
     video_name = video.split('/')[-1]
@@ -114,6 +122,7 @@ for video in videos_list:
     videos[video_name]['frame'].sort()
     videos[video_name]['length'] = len(videos[video_name]['frame'])
 
+# initialize label list, psnr dict and feature_distance_list (compactness loss) dict
 labels_list = []
 label_length = 0
 psnr_list = {}
@@ -122,15 +131,21 @@ feature_distance_list = {}
 start = time.time()
 print('Start Evaluation of', args.dataset_type)
 
-# Setting for video anomaly detection
+# setting for video anomaly detection
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
     if args.method == 'pred':
-        labels_list = np.append(
-            labels_list, labels[0][4+label_length:videos[video_name]['length']+label_length])
+        from_frame = 4+label_length
+        to_frame = videos[video_name]['length']+label_length
+        frame_labels = labels[0][from_frame:to_frame]
+        labels_list = np.append(labels_list, frame_labels)
     else:
-        labels_list = np.append(
-            labels_list, labels[0][label_length:videos[video_name]['length']+label_length])
+        from_frame = label_length
+        to_frame = videos[video_name]['length']+label_length
+        frame_labels = labels[0][from_frame:to_frame]
+        labels_list = np.append(labels_list, frame_labels)
+
+    # update indices
     label_length += videos[video_name]['length']
     psnr_list[video_name] = []
     feature_distance_list[video_name] = []
@@ -142,6 +157,9 @@ m_items_test = m_items.clone()
 
 model.eval()
 
+# Iterate on each frame of the whole dataset, forward through the model
+# predict: img ndim = 4, shape ([1, 15, 256, 256])
+# recons: img ndim = 4, shape ([1, 3, 256, 256])
 for k, (imgs) in enumerate(test_batch):
 
     # imgSrc_clone = torch.clone(imgs)
@@ -204,9 +222,11 @@ for k, (imgs) in enumerate(test_batch):
         query = query.permute(0, 2, 3, 1)  # b X h X w X d
         m_items_test = model.memory.update(query, m_items_test, False)
 
+    # calculate psnr for each frame and then append it to psnr list
     psnr_score = psnr(mse_imgs)
     psnr_index = videos_list[video_num].split('/')[-1]
     psnr_list[psnr_index].append(psnr_score)
+    # append compactness lost of current frame to compactness list
     feature_distance_list[videos_list[video_num].split(
         '/')[-1]].append(mse_feas)
 

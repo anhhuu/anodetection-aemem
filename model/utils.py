@@ -56,6 +56,7 @@ class DataLoader(data.Dataset):
         for video in sorted(videos):
             video_name = video.split('/')[-1]
             for i in range(len(self.videos[video_name]['frame'])-self._time_step):
+                # load frame in dataset into frames list
                 frames.append(self.videos[video_name]['frame'][i])
 
         return frames
