@@ -1,35 +1,23 @@
 import numpy as np
 import os
-import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-import torchvision
-import torch.nn.init as init
 import torch.utils.data as data
-import torch.utils.data.dataset as dataset
-import torchvision.datasets as dset
 import torchvision.transforms as transforms
-from torch import Tensor
 from torch.autograd import Variable
-import torchvision.utils as v_utils
 import matplotlib.pyplot as plt
-import cv2
-import math
 from collections import OrderedDict
-import copy
 import time
 from model.utils import DataLoader
 from model.final_future_prediction_with_memory_spatial_sumonly_weight_ranking_top1 import *
 from model.Reconstruction import *
-from sklearn.metrics import roc_auc_score
 from utils import *
-import random
 import glob
 import time
 import argparse
-
+import time
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description="MNAD")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -41,9 +29,9 @@ parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--method', type=str, default='pred',
+parser.add_argument('--method', type=str, default='recons',
                     help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=5,
+parser.add_argument('--t_length', type=int, default=1,
                     help='length of the frame sequences')
 parser.add_argument('--fdim', type=int, default=512,
                     help='channel dimension of the features')
@@ -67,6 +55,11 @@ parser.add_argument('--model_dir', type=str,
                     default='./trained_model/Ped2_reconstruction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
                     default='./trained_model/Ped2_reconstruction_keys.pt', help='directory of model')
+
+
+start_time = datetime.now()
+print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
+args = parser.parse_args()
 
 args = parser.parse_args()
 
@@ -236,29 +229,30 @@ anomaly_score_total_list = []
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
 
-    PSNR_list = psnr_list[video_name]
+    psnr_list_of_video = psnr_list[video_name]
     # min-max normalization for PSNR
-    Anomaly_score_list = anomaly_score_list(PSNR_list)
+    anomaly_score_list_of_video = anomaly_score_list(psnr_list_of_video)
 
-    Feature_distance_list = feature_distance_list[video_name]
+    feature_distance_list_of_video = feature_distance_list[video_name]
     # min-max normalization for compactness loss
-    Anomaly_score_list_inv = anomaly_score_list_inv(Feature_distance_list)
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv(
+        feature_distance_list_of_video)
 
     # Sum score for anomaly rate
-    score = score_sum(Anomaly_score_list, Anomaly_score_list_inv, args.alpha)
+    score = score_sum(anomaly_score_list_of_video,
+                      anomaly_score_list_inv_of_video, args.alpha)
 
     # Append score to total list
     anomaly_score_total_list += score
 
-anomaly_score_total_list = np.asarray(anomaly_score_total_list)
 
-for i in range(len(anomaly_score_total_list)):
-    print(i, ": ", anomaly_score_total_list[i])
+anomaly_score_total_list = np.asarray(anomaly_score_total_list)
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
 
 print('The result of ', args.dataset_type)
 print('AUC: ', accuracy*100, '%')
-end = time.time()
-timeRange = end-start
-print('Take: ', timeRange / 60, ' minutes')
+
+end_time = datetime.now()
+time_range = end_time-start_time
+print('Evaluate take: ', time_range)
