@@ -29,9 +29,9 @@ parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--method', type=str, default='recons',
+parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=1,
+parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--fdim', type=int, default=512,
                     help='channel dimension of the features')
@@ -52,14 +52,12 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./trained_model/Ped2_reconstruction_model.pth', help='directory of model')
+                    default='./my_trained_model/ped1_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./trained_model/Ped2_reconstruction_keys.pt', help='directory of model')
-
+                    default='./my_trained_model/ped1_prediction_keys.pt', help='directory of model')
 
 start_time = datetime.now()
 print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
-args = parser.parse_args()
 
 args = parser.parse_args()
 
@@ -122,7 +120,7 @@ psnr_list = {}
 feature_distance_list = {}
 
 start = time.time()
-print('Start Evaluation of', args.dataset_type)
+print('Start Evaluation of:', args.dataset_type, ', method:', args.method)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):

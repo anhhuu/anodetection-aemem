@@ -53,8 +53,8 @@ parser.add_argument('--dataset_path', type=str,
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
-startTime = datetime.now()
-print("Start time: ", startTime.strftime("%d/%m/%Y %H:%M:%S"))
+start_time = datetime.now()
+print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
 
 args = parser.parse_args()
 
@@ -180,6 +180,6 @@ sys.stdout = orig_stdout
 f.close()
 
 print('Training is finished')
-endTime = time.time()
-timeRange = endTime-startTime
-print('Training take: ', str(datetime.timedelta(seconds=timeRange)))
+end_time = time.time()
+time_range = end_time-start_time
+print('Training is taken: ', time_range)
