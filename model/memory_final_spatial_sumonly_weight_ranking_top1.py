@@ -90,18 +90,24 @@ class Memory(nn.Module):
 
         return torch.tensor(output)
 
-    def get_update_query(self, mem, max_indices, update_indices, score, query, train):
-
+    def get_update_query(self, mem, gathering_indices, update_indices, score, query, train): # max_indices = gathering_indices
         m, d = mem.size()
         if train:
             query_update = torch.zeros((m, d)).cuda()
             # random_update = torch.zeros((m,d)).cuda()
             for i in range(m):
-                idx = torch.nonzero(max_indices.squeeze(1) == i)
+                squeeze_gathering = gathering_indices.squeeze(1)
+                flag = squeeze_gathering == i
+                idx = torch.nonzero(flag)  # indices of nonzero values
                 a, _ = idx.size()
                 if a != 0:
-                    query_update[i] = torch.sum(
-                        ((score[idx, i] / torch.max(score[:, i])) * query[idx].squeeze(1)), dim=0)
+                    v_tk = score[idx, i] 
+                    max_vtk = torch.max(score[:, i])
+                    v_comma = v_tk / max_vtk
+                    query_value = query[idx].squeeze(1)
+                    update_value = v_comma * query_value
+                    sum_value = torch.sum(update_value, dim=0)
+                    query_update[i] = sum_value
                 else:
                     query_update[i] = 0
 
@@ -124,13 +130,14 @@ class Memory(nn.Module):
         bs, h, w, d = query.size()
         m, d = mem.size()
 
-        score = torch.matmul(query, torch.t(mem))  # b X h X w X m
+        # b X h X w X m # Cosine similarity
+        score = torch.matmul(query, torch.t(mem))
         score = score.view(bs*h*w, m)  # (b X h X w) X m
 
-        score_query = F.softmax(score, dim=0)
-        score_memory = F.softmax(score, dim=1)
+        query_score = F.softmax(score, dim=0)   # v
+        memory_score = F.softmax(score, dim=1)  # w
 
-        return score_query, score_memory
+        return query_score, memory_score
 
     def forward(self, query, keys, train=True):
 
@@ -170,22 +177,23 @@ class Memory(nn.Module):
 
         batch_size, h, w, dims = query.size()  # b X h X w X d
 
-        softmax_score_query, softmax_score_memory = self.get_score(keys, query)
+        query_score, memory_score = self.get_score(keys, query)
+        #     v,           w
 
         query_reshape = query.contiguous().view(batch_size*h*w, dims)
 
-        _, gathering_indices = torch.topk(softmax_score_memory, 1, dim=1)
-        _, updating_indices = torch.topk(softmax_score_query, 1, dim=0)
+        _, gathering_indices = torch.topk(memory_score, 1, dim=1)
+        _, updating_indices = torch.topk(query_score, 1, dim=0)
 
         if train:
 
             query_update = self.get_update_query(
-                keys, gathering_indices, updating_indices, softmax_score_query, query_reshape, train)
+                keys, gathering_indices, updating_indices, query_score, query_reshape, train)
             updated_memory = F.normalize(query_update + keys, dim=1)
 
         else:
             query_update = self.get_update_query(
-                keys, gathering_indices, updating_indices, softmax_score_query, query_reshape, train)
+                keys, gathering_indices, updating_indices, query_score, query_reshape, train)
             updated_memory = F.normalize(query_update + keys, dim=1)
 
         return updated_memory.detach()
