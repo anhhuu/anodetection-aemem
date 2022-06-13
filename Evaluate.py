@@ -47,19 +47,19 @@ parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
 parser.add_argument('--num_workers_test', type=int, default=1,
                     help='number of workers for the test loader')
-parser.add_argument('--dataset_type', type=str, default='ped2',
-                    help='type of dataset: ped2, avenue, shanghai')
+parser.add_argument('--dataset_type', type=str, default='avenue',
+                    help='type of dataset: ped1, ped2, avenue, shanghai')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/ped2_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/2/avenue_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/ped2_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/2/avenue_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
 start_time = datetime.now()
-print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
+print("Start time:", start_time.strftime("%d/%m/%Y %H:%M:%S"))
 
 args = parser.parse_args()
 
@@ -121,8 +121,7 @@ label_length = 0
 psnr_list = {}
 feature_distance_list = {}
 
-start = time.time()
-print('Start Evaluation of:', args.dataset_type, ', method:', args.method)
+print('Start Evaluation of:', args.dataset_type + ',', 'method:', args.method)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):
