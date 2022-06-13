@@ -13,6 +13,7 @@ from collections import OrderedDict
 import copy
 import time
 from sklearn.metrics import roc_auc_score
+from sklearn import metrics
 
 
 def rmse(predictions, targets):
@@ -76,9 +77,33 @@ def anomaly_score_list_inv(psnr_list):
 
 
 def AUC(anomal_scores, labels):
+    # calculate AUC
     frame_auc = roc_auc_score(y_true=np.squeeze(
         labels, axis=0), y_score=np.squeeze(anomal_scores))
+
     return frame_auc
+
+
+def plotROC(anomal_scores, labels, auc, log_dir):
+    # plot ROC curve
+    fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(
+        labels, axis=0), y_score=np.squeeze(anomal_scores))
+
+    # create ROC curve
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, 'b', label='ROC curve (AUC = %0.4f)' % auc)
+    plt.legend(loc='lower right')
+    plt.plot([0, 1], [0, 1], 'r--', label='random predict')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+
+    #plt.plot([0, 1], [1, 0], color='black', linewidth=1.5, linestyle='dashed')
+    #plt.legend(loc='lower right')
+
+    plt.savefig(os.path.join(log_dir, 'ROC.png'))
+    # plt.show()
 
 
 def score_sum(list1, list2, alpha):
