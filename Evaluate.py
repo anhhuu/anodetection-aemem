@@ -52,9 +52,11 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/ped1_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/ped1_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/ped2_prediction_keys.pt', help='directory of model')
+parser.add_argument('--exp_dir', type=str, default='log',
+                    help='directory of log')
 
 start_time = datetime.now()
 print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
@@ -205,8 +207,8 @@ for k, (imgs) in enumerate(test_batch):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-    # Calculating the threshold for updating at the test time
-    point_sc = point_score(outputs, imgs)
+        # Calculating the threshold for updating at the test time
+        point_sc = point_score(outputs, imgs)
 
     if point_sc < args.th:
         query = F.normalize(feas, dim=1)
@@ -248,9 +250,17 @@ anomaly_score_total_list = np.asarray(anomaly_score_total_list)
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
 
-print('The result of ', args.dataset_type)
-print('AUC: ', accuracy*100, '%')
+log_dir = os.path.join('./exp', args.dataset_type, args.method, args.exp_dir)
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+plotROC(anomaly_score_total_list, np.expand_dims(
+    1-labels_list, 0), accuracy, log_dir)
+
+print('The result of', args.dataset_type)
+print('AUC:', accuracy*100, '%')
+
 
 end_time = datetime.now()
 time_range = end_time-start_time
-print('Evaluate take: ', time_range)
+print('Evaluate is taken: ', time_range)

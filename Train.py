@@ -54,9 +54,12 @@ parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
 start_time = datetime.now()
-print("Start time: ", start_time.strftime("%d/%m/%Y %H:%M:%S"))
+print("Start time:", start_time.strftime("%d/%m/%Y %H:%M:%S"))
 
 args = parser.parse_args()
+
+print("Dataset: ", args.dataset_type)
+print("Method: ", args.method)
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 if args.gpus is None:
@@ -91,7 +94,7 @@ train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.num_workers, drop_last=True)
 test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
                              shuffle=False, num_workers=args.num_workers_test, drop_last=False)
-print('Loading dataset: DONE')
+print('Loading dataset is finished')
 
 
 # Model setting
@@ -110,7 +113,7 @@ params = params_encoder + params_decoder
 optimizer = torch.optim.Adam(params, lr=args.lr)
 scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 model.cuda()
-print('Model setting: DONE')
+print('Setting up model is finished')
 
 print('Start training and logging into file')
 # Report the training process
@@ -173,8 +176,13 @@ for epoch in range(args.epochs):
 
 print('Training is finished')
 # Save the model and the memory items
-torch.save(model, os.path.join(log_dir, 'model.pth'))
-torch.save(m_items, os.path.join(log_dir, 'keys.pt'))
+prefix_output_name = args.dataset_type
+if args.method == 'pred':
+    prefix_output_name = prefix_output_name + '_prediction_'
+else:
+    prefix_output_name = prefix_output_name + '_reconstruction_'
+torch.save(model, os.path.join(log_dir, prefix_output_name + 'model.pth'))
+torch.save(m_items, os.path.join(log_dir, prefix_output_name + 'keys.pt'))
 
 sys.stdout = orig_stdout
 f.close()
