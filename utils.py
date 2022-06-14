@@ -15,6 +15,7 @@ import time
 from sklearn.metrics import roc_auc_score
 from sklearn import metrics
 from matplotlib.pyplot import figure
+from matplotlib import colors
 
 
 def rmse(predictions, targets):
@@ -108,16 +109,30 @@ def plot_ROC(anomal_scores, labels, auc, log_dir):
     # plt.show()
 
 
-def plot_anomaly_scores(anomaly_score_total_list, log_dir):
+def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir):
+    matrix = np.array([labels == 1])
+
+    # Mask the False occurences in the numpy array as 'bad' data
+    matrix = np.ma.masked_where(matrix == True, matrix)
+
+    # Create a ListedColormap with only the color green specified
+    cmap = colors.ListedColormap(['none'])
+
+    # Use the `set_bad` property of `colormaps` to set all the 'bad' data to red
+    cmap.set_bad(color='lavenderblush')
+    fig, ax = plt.subplots()
+    fig.set_size_inches(18, 7)
+    ax.pcolormesh(matrix, cmap=cmap, edgecolor='none', linestyle='-', lw=1)
+
     y = anomaly_score_total_list
     x = np.arange(0, len(y))
     # plt.title("Anomaly score/frame")
-    figure(figsize=(15, 6), dpi=100)
-    plt.plot(x, y, color="orange", label="score/frame")
+    plt.plot(x, y, color="steelblue", label="score/frame")
     plt.legend(loc='lower left')
     plt.ylabel('Score')
     plt.xlabel('Frames')
     plt.savefig(os.path.join(log_dir, 'anomaly_score.png'))
+    plt.show()
 
 
 def score_sum(list1, list2, alpha):

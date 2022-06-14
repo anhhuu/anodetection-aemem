@@ -257,7 +257,7 @@ if not os.path.exists(log_dir):
 plot_ROC(anomaly_score_total_list, np.expand_dims(
     1-labels_list, 0), accuracy, log_dir)
 
-plot_anomaly_scores(anomaly_score_total_list, log_dir)
+plot_anomaly_scores(anomaly_score_total_list, labels[0], log_dir)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
