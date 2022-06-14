@@ -14,7 +14,7 @@ from utils import *
 from datetime import datetime
 import argparse
 
-parser = argparse.ArgumentParser(description="MNAD")
+parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')

@@ -51,16 +51,24 @@ Evaluate is taken: 0:04:33.499480
 ```
 
 ```
+TIME 1 TRAIN:
 Start time: 12/06/2022 16:26:57
 Start Evaluation of: ped2, method: pred
 The result of ped2
 AUC: 94.05855172911703 %
 Evaluate is taken: 0:01:06.151858
+
+TIME 2 TRAIN:
+Start time: 14/06/2022 22:26:38
+Start Evaluation of: ped2, method: pred, trained model used: ped2
+The result of ped2
+AUC: 95.10919789184898 %
+Evaluate is taken:  0:01:13.954537
 ```
 
 ```
 Start time:  12/06/2022 21:58:09
-Start Evaluation of: ped1, method: pred, trained model: ped2
+Start Evaluation of: ped1, method: pred, trained model used: ped2
 The result of  ped1
 AUC:  69.29355295063021 %
 Evaluate is taken:  0:04:56.381137
@@ -68,7 +76,7 @@ Evaluate is taken:  0:04:56.381137
 
 ```
 Start time:  12/06/2022 21:54:15
-Start Evaluation of: ped2, method: pred,  trained model: ped1
+Start Evaluation of: ped2, method: pred, trained model used: ped1
 The result of  ped2
 AUC:  87.69078044906503 %
 Evaluate is taken:  0:01:09.728352

@@ -19,7 +19,7 @@ import argparse
 import time
 from datetime import datetime
 
-parser = argparse.ArgumentParser(description="MNAD")
+parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')
@@ -47,7 +47,7 @@ parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
 parser.add_argument('--num_workers_test', type=int, default=1,
                     help='number of workers for the test loader')
-parser.add_argument('--dataset_type', type=str, default='ped2',
+parser.add_argument('--dataset_type', type=str, default='ped1',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
@@ -121,7 +121,18 @@ label_length = 0
 psnr_list = {}
 feature_distance_list = {}
 
-print('Start Evaluation of:', args.dataset_type + ',', 'method:', args.method)
+trained_model_using = ""
+if "ped1" in args.model_dir:
+    trained_model_using = "ped1"
+elif "ped2" in args.model_dir:
+    trained_model_using = "ped2"
+elif "avenue" in args.model_dir:
+    trained_model_using = "avenue"
+elif "shanghai" in args.model_dir:
+    trained_model_using = "shanghai"
+
+print('Start Evaluation of:', args.dataset_type + ',', 'method:',
+      args.method + ',', 'trained model used:', trained_model_using)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):
@@ -256,9 +267,10 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 plot_ROC(anomaly_score_total_list, np.expand_dims(
-    1-labels_list, 0), accuracy, log_dir)
+    1-labels_list, 0), accuracy, log_dir, args.dataset_type, args.method, trained_model_using)
 
-plot_anomaly_scores(anomaly_score_total_list, labels[0], log_dir)
+plot_anomaly_scores(anomaly_score_total_list,
+                    labels[0], log_dir, args.dataset_type, args.method, trained_model_using)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')

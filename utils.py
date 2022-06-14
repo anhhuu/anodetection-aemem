@@ -86,13 +86,15 @@ def AUC(anomal_scores, labels):
     return frame_auc
 
 
-def plot_ROC(anomal_scores, labels, auc, log_dir):
+def plot_ROC(anomal_scores, labels, auc, log_dir, dataset_type, method, trained_model_using):
     # plot ROC curve
     fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(
         labels, axis=0), y_score=np.squeeze(anomal_scores))
 
     # create ROC curve
-    plt.title('Receiver Operating Characteristic')
+    plt.title('Receiver Operating Characteristic \nmethod: ' +
+              method + ', dataset: ' + dataset_type +
+              ', trained model used: ' + trained_model_using)
     plt.plot(fpr, tpr, 'b', label='ROC curve (AUC = %0.4f)' % auc)
     plt.legend(loc='lower right')
     plt.plot([0, 1], [0, 1], 'r--', label='random predict')
@@ -108,7 +110,7 @@ def plot_ROC(anomal_scores, labels, auc, log_dir):
     plt.savefig(os.path.join(log_dir, 'ROC.png'))
 
 
-def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir):
+def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir, dataset_type, method, trained_model_using):
     matrix = np.array([labels == 1])
 
     # Mask the False occurences in the numpy array as 'bad' data
@@ -121,7 +123,9 @@ def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir):
     cmap.set_bad(color='lavenderblush')
     fig, ax = plt.subplots()
     fig.set_size_inches(18, 7)
-    plt.title("Anomaly score/frame")
+    plt.title('Anomaly score/frame, method: ' +
+              method + ', dataset: ' + dataset_type +
+              ', trained model used: ' + trained_model_using)
     ax.pcolormesh(matrix, cmap=cmap, edgecolor='none', linestyle='-', lw=1)
 
     y = anomaly_score_total_list
