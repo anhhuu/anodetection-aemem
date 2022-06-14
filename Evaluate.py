@@ -224,16 +224,14 @@ for k, (imgs) in enumerate(test_batch):
             (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
-        # imgOut_clone = torch.clone(imgs)
+        # imgOut_clone = torch.clone(outputs)
         # imgOut_clone = imgOut_clone[0].permute(1, 2, 0)
         # imgOut_clone = imgOut_clone.cpu().detach().numpy()
 
         # imgOut_clone = (imgOut_clone + 1) * 127.5  # revert range
         # imgOut_clone = imgOut_clone.astype(dtype=np.uint8)
-        # cv2.imshow('image window', imgOut_clone)
-
-        # cv2.imwrite(os.path.join(output_frames_dir, "/%4d" %
-        #             k, ), imgOut_clone)
+        # img_name_dir = output_frames_dir + "/%04d.jpg" % k
+        # cv2.imwrite(img_name_dir, imgOut_clone)
 
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
