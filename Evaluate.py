@@ -47,14 +47,14 @@ parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
 parser.add_argument('--num_workers_test', type=int, default=1,
                     help='number of workers for the test loader')
-parser.add_argument('--dataset_type', type=str, default='avenue',
+parser.add_argument('--dataset_type', type=str, default='ped2',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/2/avenue_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/2/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/2/avenue_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/2/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
@@ -247,14 +247,17 @@ for video in sorted(videos_list):
 
 anomaly_score_total_list = np.asarray(anomaly_score_total_list)
 
+
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
 
 log_dir = os.path.join('./exp', args.dataset_type, args.method, args.exp_dir)
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-plotROC(anomaly_score_total_list, np.expand_dims(
+plot_ROC(anomaly_score_total_list, np.expand_dims(
     1-labels_list, 0), accuracy, log_dir)
+
+plot_anomaly_scores(anomaly_score_total_list, log_dir)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')

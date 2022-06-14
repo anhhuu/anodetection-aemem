@@ -14,6 +14,7 @@ import copy
 import time
 from sklearn.metrics import roc_auc_score
 from sklearn import metrics
+from matplotlib.pyplot import figure
 
 
 def rmse(predictions, targets):
@@ -84,16 +85,17 @@ def AUC(anomal_scores, labels):
     return frame_auc
 
 
-def plotROC(anomal_scores, labels, auc, log_dir):
+def plot_ROC(anomal_scores, labels, auc, log_dir):
     # plot ROC curve
     fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(
         labels, axis=0), y_score=np.squeeze(anomal_scores))
 
     # create ROC curve
-    plt.title('Receiver Operating Characteristic')
+    # plt.title('Receiver Operating Characteristic')
     plt.plot(fpr, tpr, 'b', label='ROC curve (AUC = %0.4f)' % auc)
     plt.legend(loc='lower right')
     plt.plot([0, 1], [0, 1], 'r--', label='random predict')
+    plt.legend(loc='lower right')
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.ylabel('True Positive Rate')
@@ -104,6 +106,18 @@ def plotROC(anomal_scores, labels, auc, log_dir):
 
     plt.savefig(os.path.join(log_dir, 'ROC.png'))
     # plt.show()
+
+
+def plot_anomaly_scores(anomaly_score_total_list, log_dir):
+    y = anomaly_score_total_list
+    x = np.arange(0, len(y))
+    # plt.title("Anomaly score/frame")
+    figure(figsize=(15, 6), dpi=100)
+    plt.plot(x, y, color="orange", label="score/frame")
+    plt.legend(loc='lower left')
+    plt.ylabel('Score')
+    plt.xlabel('Frames')
+    plt.savefig(os.path.join(log_dir, 'anomaly_score.png'))
 
 
 def score_sum(list1, list2, alpha):
