@@ -92,7 +92,7 @@ def plot_ROC(anomal_scores, labels, auc, log_dir):
         labels, axis=0), y_score=np.squeeze(anomal_scores))
 
     # create ROC curve
-    # plt.title('Receiver Operating Characteristic')
+    plt.title('Receiver Operating Characteristic')
     plt.plot(fpr, tpr, 'b', label='ROC curve (AUC = %0.4f)' % auc)
     plt.legend(loc='lower right')
     plt.plot([0, 1], [0, 1], 'r--', label='random predict')
@@ -106,7 +106,6 @@ def plot_ROC(anomal_scores, labels, auc, log_dir):
     #plt.legend(loc='lower right')
 
     plt.savefig(os.path.join(log_dir, 'ROC.png'))
-    # plt.show()
 
 
 def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir):
@@ -122,17 +121,16 @@ def plot_anomaly_scores(anomaly_score_total_list, labels, log_dir):
     cmap.set_bad(color='lavenderblush')
     fig, ax = plt.subplots()
     fig.set_size_inches(18, 7)
+    plt.title("Anomaly score/frame")
     ax.pcolormesh(matrix, cmap=cmap, edgecolor='none', linestyle='-', lw=1)
 
     y = anomaly_score_total_list
     x = np.arange(0, len(y))
-    # plt.title("Anomaly score/frame")
     plt.plot(x, y, color="steelblue", label="score/frame")
     plt.legend(loc='lower left')
     plt.ylabel('Score')
     plt.xlabel('Frames')
     plt.savefig(os.path.join(log_dir, 'anomaly_score.png'))
-    plt.show()
 
 
 def score_sum(list1, list2, alpha):

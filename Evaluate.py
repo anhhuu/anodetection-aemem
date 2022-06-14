@@ -52,9 +52,9 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/2/ped2_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/1/ped1_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/2/ped2_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/1/ped1_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
@@ -246,7 +246,8 @@ for video in sorted(videos_list):
 
 
 anomaly_score_total_list = np.asarray(anomaly_score_total_list)
-
+print('Number of frames:', len(labels[0]))
+print('len of anomaly score:', len(anomaly_score_total_list))
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
 
