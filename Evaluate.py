@@ -47,14 +47,14 @@ parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
 parser.add_argument('--num_workers_test', type=int, default=1,
                     help='number of workers for the test loader')
-parser.add_argument('--dataset_type', type=str, default='ped1',
+parser.add_argument('--dataset_type', type=str, default='ped2',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/1/ped1_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/2/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/1/ped1_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/2/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 
@@ -160,6 +160,15 @@ m_items_test = m_items.clone()
 
 model.eval()
 
+output_dir = os.path.join('./output_dataset', args.dataset_type,
+                          args.method)
+output_frames_dir = os.path.join(output_dir, 'frames')
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+if not os.path.exists(output_frames_dir):
+    os.makedirs(output_frames_dir)
+
 # Iterate on each frame of the whole dataset, forward through the model
 # predict: img ndim = 4, shape ([1, 15, 256, 256])
 # recons: img ndim = 4, shape ([1, 3, 256, 256])
@@ -196,6 +205,15 @@ for k, (imgs) in enumerate(test_batch):
             (outputs[0]+1)/2, (imgs[0, 3*4:]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
+        # imgOut_clone = torch.clone(outputs)
+        # imgOut_clone = imgOut_clone[0].permute(1, 2, 0)
+        # imgOut_clone = imgOut_clone.cpu().detach().numpy()
+
+        # imgOut_clone = (imgOut_clone + 1) * 127.5  # revert range
+        # imgOut_clone = imgOut_clone.astype(dtype=np.uint8)
+        # img_name_dir = output_frames_dir + "/%04d.jpg" % k
+        # cv2.imwrite(img_name_dir, imgOut_clone)
+
         # Calculating the threshold for updating at the test time
         point_sc = point_score(outputs, imgs[:, 3*4:])
 
@@ -206,14 +224,17 @@ for k, (imgs) in enumerate(test_batch):
             (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
-        # imgRecon_clone = torch.clone(imgs)
-        # imgRecon_clone = imgRecon_clone[0].permute(1, 2, 0)
-        # imgRecon_clone = imgRecon_clone.cpu().detach().numpy()
+        # imgOut_clone = torch.clone(imgs)
+        # imgOut_clone = imgOut_clone[0].permute(1, 2, 0)
+        # imgOut_clone = imgOut_clone.cpu().detach().numpy()
 
-        # imgRecon_clone = (imgRecon_clone + 1) * 127.5  # revert range
-        # imgRecon_clone = imgRecon_clone.astype(dtype=np.uint8)
+        # imgOut_clone = (imgOut_clone + 1) * 127.5  # revert range
+        # imgOut_clone = imgOut_clone.astype(dtype=np.uint8)
+        # cv2.imshow('image window', imgOut_clone)
 
-        # cv2.imshow('image window', imgRecon_clone)
+        # cv2.imwrite(os.path.join(output_frames_dir, "/%4d" %
+        #             k, ), imgOut_clone)
+
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
@@ -271,6 +292,8 @@ plot_ROC(anomaly_score_total_list, np.expand_dims(
 
 plot_anomaly_scores(anomaly_score_total_list,
                     labels[0], log_dir, args.dataset_type, args.method, trained_model_using)
+
+np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')

@@ -6,3 +6,4 @@ sandbox-test
 raw-dataset
 __pycache__
 my_trained_model
+output_dataset
