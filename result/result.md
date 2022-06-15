@@ -1,11 +1,21 @@
 ## RUN ON COLAB WITH MY TRAINED MODEL
 
 ```
+1ST TRAINING:
 Start time: 12/06/2022 06-17-52
 Start Evaluation of: avenue, method: pred
 The result of avenue
 AUC: 79.39960332784052 %
 Evaluate is taken 1:30:05.098720
+
+2ND TRAINING:
+Start time: 14/06/2022 17:33:12
+Start Evaluation of: avenue, method: pred, trained model used: avenue
+Number of frames: 15324
+len of anomaly score: 15240
+The result of avenue
+AUC: 86.55090972041883 %
+Evaluate is taken:  0:17:13.396478
 ```
 
 ```
@@ -17,14 +27,14 @@ Evaluate is taken: 1:05:11.738037
 ```
 
 ```
-TIME 1 TRAIN:
+1ST TRAINING:
 Start time: 12/06/2022 10:42:37
 Start Evaluation of: ped2, method: pred
 The result of ped2
 AUC: 94.05837123673379 %
 Evaluate is taken: 0:18:19.101222
 
-TIME 2 TRAIN:
+2ND TRAINING:
 Start time:  12/06/2022 17:29:51
 Start Evaluation of: ped2, method: pred
 The result of  ped2
@@ -51,14 +61,14 @@ Evaluate is taken: 0:04:33.499480
 ```
 
 ```
-TIME 1 TRAIN:
+1ST TRAINING:
 Start time: 12/06/2022 16:26:57
 Start Evaluation of: ped2, method: pred
 The result of ped2
 AUC: 94.05855172911703 %
 Evaluate is taken: 0:01:06.151858
 
-TIME 2 TRAIN:
+2ND TRAINING:
 Start time: 14/06/2022 22:26:38
 Start Evaluation of: ped2, method: pred, trained model used: ped2
 The result of ped2
