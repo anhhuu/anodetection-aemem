@@ -188,6 +188,6 @@ sys.stdout = orig_stdout
 f.close()
 
 print('Training is finished')
-end_time = time.time()
+end_time = datetime.now()
 time_range = end_time-start_time
 print('Training is taken: ', time_range)

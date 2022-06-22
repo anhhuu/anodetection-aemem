@@ -52,11 +52,13 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/2/ped2_prediction_model.pth', help='directory of model')
+                    default='./my_trained_model/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/2/ped2_prediction_keys.pt', help='directory of model')
+                    default='./my_trained_model/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
+parser.add_argument('--is_save_output', type=str, default='true',
+                    help='is save predicted image')
 
 start_time = datetime.now()
 print("Start time:", start_time.strftime("%d/%m/%Y %H:%M:%S"))
@@ -160,8 +162,7 @@ m_items_test = m_items.clone()
 
 model.eval()
 
-output_dir = os.path.join('./output_dataset', args.dataset_type,
-                          args.method)
+output_dir = os.path.join('./dataset', args.dataset_type, 'output')
 output_frames_dir = os.path.join(output_dir, 'frames')
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -173,18 +174,6 @@ if not os.path.exists(output_frames_dir):
 # predict: img ndim = 4, shape ([1, 15, 256, 256])
 # recons: img ndim = 4, shape ([1, 3, 256, 256])
 for k, (imgs) in enumerate(test_batch):
-
-    # imgSrc_clone = torch.clone(imgs)
-    # imgSrc_clone = imgSrc_clone[0].permute(1, 2, 0)
-    # imgSrc_clone = imgSrc_clone.cpu().detach().numpy()
-
-    # imgSrc_clone = (imgSrc_clone + 1) * 127.5  # revert range
-    # imgSrc_clone = imgSrc_clone.astype(dtype=np.uint8)
-
-    # cv2.imshow('image window', imgSrc_clone)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
     if args.method == 'pred':
         if k == label_length-4*(video_num+1):
             video_num += 1
@@ -205,17 +194,31 @@ for k, (imgs) in enumerate(test_batch):
             (outputs[0]+1)/2, (imgs[0, 3*4:]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
-        # imgOut_clone = torch.clone(outputs)
-        # imgOut_clone = imgOut_clone[0].permute(1, 2, 0)
-        # imgOut_clone = imgOut_clone.cpu().detach().numpy()
-
-        # imgOut_clone = (imgOut_clone + 1) * 127.5  # revert range
-        # imgOut_clone = imgOut_clone.astype(dtype=np.uint8)
-        # img_name_dir = output_frames_dir + "/%04d.jpg" % k
-        # cv2.imwrite(img_name_dir, imgOut_clone)
-
         # Calculating the threshold for updating at the test time
         point_sc = point_score(outputs, imgs[:, 3*4:])
+
+        if args.is_save_output == 'true':
+            num_frame = len(test_batch)
+            num_digit_of_num_frame = len(str(num_frame))
+
+            img_out_clone = torch.clone(outputs)
+            img_out_clone = img_out_clone[0].permute(1, 2, 0)
+            img_out_clone = img_out_clone.cpu().detach().numpy()
+
+            img_out_clone = (img_out_clone + 1) * 127.5  # revert range
+            img_out_clone = img_out_clone.astype(dtype=np.uint8)
+
+            img_name_dir = ""
+            if num_digit_of_num_frame == 3:
+                img_name_dir = output_frames_dir + "/%03d.jpg" % k
+            elif num_digit_of_num_frame == 4:
+                img_name_dir = output_frames_dir + "/%04d.jpg" % k
+            elif num_digit_of_num_frame == 5:
+                img_name_dir = output_frames_dir + "/%05d.jpg" % k
+            else:
+                img_name_dir = output_frames_dir + "/%d.jpg" % k
+
+            cv2.imwrite(img_name_dir, img_out_clone)
 
     else:
         outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(
@@ -224,20 +227,31 @@ for k, (imgs) in enumerate(test_batch):
             (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
-        # imgOut_clone = torch.clone(outputs)
-        # imgOut_clone = imgOut_clone[0].permute(1, 2, 0)
-        # imgOut_clone = imgOut_clone.cpu().detach().numpy()
-
-        # imgOut_clone = (imgOut_clone + 1) * 127.5  # revert range
-        # imgOut_clone = imgOut_clone.astype(dtype=np.uint8)
-        # img_name_dir = output_frames_dir + "/%04d.jpg" % k
-        # cv2.imwrite(img_name_dir, imgOut_clone)
-
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
         # Calculating the threshold for updating at the test time
         point_sc = point_score(outputs, imgs)
+
+        if args.is_save_output == 'true':
+            num_frame = len(test_batch)
+            num_digit_of_num_frame = len(str(num_frame))
+
+            img_out_clone = torch.clone(outputs)
+            img_out_clone = img_out_clone[0].permute(1, 2, 0)
+            img_out_clone = img_out_clone.cpu().detach().numpy()
+
+            img_out_clone = (img_out_clone + 1) * 127.5  # revert range
+            img_out_clone = img_out_clone.astype(dtype=np.uint8)
+
+            img_name_dir = ""
+            if num_digit_of_num_frame == 3:
+                img_name_dir = output_frames_dir + "/%03d.jpg" % k
+            elif num_digit_of_num_frame == 4:
+                img_name_dir = output_frames_dir + "/%04d.jpg" % k
+            elif num_digit_of_num_frame == 5:
+                img_name_dir = output_frames_dir + "/%05d.jpg" % k
+            else:
+                img_name_dir = output_frames_dir + "/%d.jpg" % k
+
+            cv2.imwrite(img_name_dir, img_out_clone)
 
     if point_sc < args.th:
         query = F.normalize(feas, dim=1)
