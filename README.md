@@ -1,5 +1,7 @@
 # anodetection-aemem
 
+![image](https://user-images.githubusercontent.com/19743019/175104995-0ecf8bf3-8069-4406-ac8d-42da3770fa25.png)
+
 Anomaly detection using autoencoder and memory module.
 
 ## Dataset
