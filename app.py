@@ -1,3 +1,4 @@
+import argparse
 from this import s
 import threading
 import pandas as pd
@@ -25,13 +26,10 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 LARGE_FONT = ("Verdana", 12)
+
 DEFAULT_DATASET_NAME = "ped2"
 DEFAULT_METHOD = "pred"
 DEFAULT_FRAME_PRED_INPUT = 4
-
-DATASET_NAME = DEFAULT_DATASET_NAME
-METHOD = DEFAULT_METHOD
-FRAME_PRED_INPUT = DEFAULT_FRAME_PRED_INPUT
 
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
@@ -43,12 +41,14 @@ def mini_frame_coord(window_H, window_W, frame_h, frame_w):
 
 
 class App:
-    def __init__(self, window, window_title, video_source=0):
+    def __init__(self, window, window_title, dataset_type=DEFAULT_DATASET_NAME, method=DEFAULT_METHOD, video_source=0):
         # create a window that contains everything on it
         self.window = window  # window = tk.Tk()
         self.window.iconbitmap()
         # set title for window
         self.window.wm_title("Anomaly Detection Application")
+        self.dataset_type = dataset_type
+        self.method = method
 
         # create canvas to show widget
         self.set_up_canvas(video_source)
@@ -57,7 +57,8 @@ class App:
         self.setup_Buttons()
 
         # create a video source (by default this will try to open the computer webcam)
-        self.vid = VideoCapture(video_source, self.current_data_path)
+        self.vid = VideoCapture(
+            video_source, self.current_data_path, self.dataset_type)
         self.numPredFrame = len(self.vid.vid[1])
 
         # create an ImgDiff object for do difference on images
@@ -128,7 +129,7 @@ class App:
                                text="Dataset: {}".format(current_dataset_name))
 
     def setup_Buttons(self):
-        self.current_data_path = ['./dataset/' + DATASET_NAME + '/', ]
+        self.current_data_path = ['./dataset/' + self.dataset_type + '/', ]
         # Button that lets the user take a snapshot
         self.open_dataset = tk.Button(self.window, text="Open Dataset", width=50, command=self.change_dataset,
                                       fg='white', bg="#263D42")
@@ -210,7 +211,7 @@ class App:
     def show_figure_of_scores_on_frame(self):
         # create a figure member
         figure = self.get_anomaly_scores_figure(self.vid.frame_scores, self.vid.labels,
-                                                DATASET_NAME, METHOD, "Trained on Ped2")
+                                                self.dataset_type, self.method, "Trained on Ped2")
 
         #frame = tk.Frame(self.container)
         label = tk.Label(text="Graph Page!", font=LARGE_FONT)
@@ -302,9 +303,11 @@ class App:
 
 
 class VideoCapture:
-    def __init__(self, video_type=0, data_path=[]):
+    def __init__(self, video_type=0, data_path=[], dataset_type=DEFAULT_DATASET_NAME, t_length=DEFAULT_FRAME_PRED_INPUT):
         self.data_path = data_path
         self.type = video_type
+        self.dataset_type = dataset_type
+        self.t_length = t_length
         # Open the video source, # capture video by webcam by default
         if self.type == 0:
             self.vid = cv2.VideoCapture(self.type)
@@ -323,7 +326,7 @@ class VideoCapture:
             self.frame_scores = np.load(
                 self.data_path[-1] + 'output/anomaly_score.npy')
             self.labels = np.load(
-                './data/frame_labels_' + DATASET_NAME + '.npy')
+                './data/frame_labels_' + self.dataset_type + '.npy')
             self.opt_threshold = self.optimalThreshold(
                 self.frame_scores, self.labels)
 
@@ -344,7 +347,7 @@ class VideoCapture:
         # load the two input images
         i = iter_frame
         list_imageA = self.vid[0]  # test frame
-        imageA = list_imageA[i + FRAME_PRED_INPUT * test_video_index[i]]
+        imageA = list_imageA[i + (self.t_length - 1) * test_video_index[i]]
         list_imageB = self.vid[1]  # pred frame
         imageB = list_imageB[i]
 
@@ -423,5 +426,14 @@ class VideoCapture:
 
 
 # Create a window and pass it to the Application object
-App(tk.Tk(), "Tkinter and OpenCV", video_source=1)
+parser = argparse.ArgumentParser(description="anomaly detection using aemem")
+parser.add_argument('--method', type=str, default='pred',
+                    help='The target task for anoamly detection')
+parser.add_argument('--t_length', type=int, default=5,
+                    help='length of the frame sequences')
+parser.add_argument('--dataset_type', type=str, default='ped2',
+                    help='type of dataset: ped1, ped2, avenue, shanghai')
+
+args = parser.parse_args()
+App(tk.Tk(), "Tkinter and OpenCV", dataset_type=args.dataset_type, video_source=1)
 cv2.destroyAllWindows()
