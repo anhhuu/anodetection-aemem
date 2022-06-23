@@ -1,9 +1,4 @@
-import numpy as np
-import os
-import sys
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from .memory_final_spatial_sumonly_weight_ranking_top1 import *
 
 

@@ -2,8 +2,6 @@ import numpy as np
 import os
 import torch
 import torch.utils.data as data
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
 from PIL import Image
 import os.path
 import sys

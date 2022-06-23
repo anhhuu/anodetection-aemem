@@ -7,7 +7,6 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
 import time
 from model.utils import DataLoader
 from utils import *

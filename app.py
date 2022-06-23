@@ -1,20 +1,12 @@
 import argparse
-from this import s
 import threading
 import pandas as pd
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-from tkinter import filedialog, Text
+    FigureCanvasTkAgg)
 from matplotlib.animation import FuncAnimation
-from cProfile import label
 import tkinter as tk
-from tkinter import ttk
-from tkinter import W, filedialog, Text
 import os
 import cv2
-from matplotlib.image import FigureImage
-from sklearn import utils
-from torch import le, sub
 from image_similarity import ImageDifference as id
 import numpy as np
 from PIL import ImageTk, Image
@@ -22,6 +14,7 @@ import time
 from sklearn import metrics
 from matplotlib import colors
 import matplotlib.pyplot as plt
+from tkinter import filedialog
 import matplotlib
 matplotlib.use("TkAgg")
 

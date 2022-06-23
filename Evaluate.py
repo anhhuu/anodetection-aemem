@@ -6,17 +6,13 @@ import torch.nn.functional as F
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
 from collections import OrderedDict
-import time
 from model.utils import DataLoader
 from model.final_future_prediction_with_memory_spatial_sumonly_weight_ranking_top1 import *
 from model.Reconstruction import *
 from utils import *
 import glob
-import time
 import argparse
-import time
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
