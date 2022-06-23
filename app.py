@@ -30,6 +30,7 @@ LARGE_FONT = ("Verdana", 12)
 DEFAULT_DATASET_NAME = "ped2"
 DEFAULT_METHOD = "pred"
 DEFAULT_FRAME_PRED_INPUT = 4
+DEFAULT_T_LENGTH = 5
 
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
@@ -41,7 +42,7 @@ def mini_frame_coord(window_H, window_W, frame_h, frame_w):
 
 
 class App:
-    def __init__(self, window, window_title, dataset_type=DEFAULT_DATASET_NAME, method=DEFAULT_METHOD, video_source=0):
+    def __init__(self, window, window_title, dataset_type=DEFAULT_DATASET_NAME, method=DEFAULT_METHOD, t_length=DEFAULT_T_LENGTH, video_source=0):
         # create a window that contains everything on it
         self.window = window  # window = tk.Tk()
         self.window.iconbitmap()
@@ -58,7 +59,7 @@ class App:
 
         # create a video source (by default this will try to open the computer webcam)
         self.vid = VideoCapture(
-            video_source, self.current_data_path, self.dataset_type)
+            video_source, self.current_data_path, self.dataset_type, frame_sequence_length=t_length-1)
         self.numPredFrame = len(self.vid.vid[1])
 
         # create an ImgDiff object for do difference on images
@@ -87,7 +88,7 @@ class App:
 
         # Setup for timer
         # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 30
+        self.delay = 10
         self.iter_frame = 0
         self.prev_frame_time = 0  # used to record the time when we processed last frame
         self.new_frame_time = 0  # used to record the time at which we processed current frame
@@ -303,11 +304,11 @@ class App:
 
 
 class VideoCapture:
-    def __init__(self, video_type=0, data_path=[], dataset_type=DEFAULT_DATASET_NAME, t_length=DEFAULT_FRAME_PRED_INPUT):
+    def __init__(self, video_type=0, data_path=[], dataset_type=DEFAULT_DATASET_NAME, frame_sequence_length=DEFAULT_FRAME_PRED_INPUT):
         self.data_path = data_path
         self.type = video_type
         self.dataset_type = dataset_type
-        self.t_length = t_length
+        self.frame_sequence_length = frame_sequence_length
         # Open the video source, # capture video by webcam by default
         if self.type == 0:
             self.vid = cv2.VideoCapture(self.type)
@@ -346,9 +347,10 @@ class VideoCapture:
         test_video_index = self.vid[2]
         # load the two input images
         i = iter_frame
-        list_imageA = self.vid[0]  # test frame
-        imageA = list_imageA[i + (self.t_length - 1) * test_video_index[i]]
-        list_imageB = self.vid[1]  # pred frame
+        list_imageA = self.vid[0]  # test frames
+        frame_no = i + self.frame_sequence_length * test_video_index[i]
+        imageA = list_imageA[frame_no]
+        list_imageB = self.vid[1]  # pred frames
         imageB = list_imageB[i]
 
         # resize image
@@ -435,5 +437,6 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 
 args = parser.parse_args()
-App(tk.Tk(), "Tkinter and OpenCV", dataset_type=args.dataset_type, video_source=1)
+App(tk.Tk(), "Tkinter and OpenCV", dataset_type=args.dataset_type,
+    method=args.method, t_length=args.t_length, video_source=1)
 cv2.destroyAllWindows()
