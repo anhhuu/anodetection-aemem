@@ -1,10 +1,3 @@
-import argparse
-import threading
-import pandas as pd
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg)
-from matplotlib.animation import FuncAnimation
-import tkinter as tk
 import os
 import cv2
 from image_similarity import ImageDifference as id
