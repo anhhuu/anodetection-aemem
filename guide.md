@@ -13,7 +13,8 @@
 ├── dataset                             // Thư mục chứa tập dữ liệu
 │   ├── ped1
 │   │   │── output                      // Thư mục chứa khung hình tái tạo/dự đoán
-│   │   │    │── anomaly_score.npy      // File đánh giá điểm bất thường của khung hình sau khi chạy đánh giá với tập dữ liệu tương ứng
+│   │   │    │── anomaly_score.npy      // File đánh giá điểm bất thường của khung hình
+│   │   │    │                          // sau khi chạy đánh giá với tập dữ liệu tương ứng
 │   │   │    └── frames
 │   │   │── training                    // Thư mục chứa khung hình huấn luyện
 │   │   │    └── frames
@@ -64,8 +65,13 @@ pip3 install numpy
 
 ```bash
 # pytorch (hỗ trợ Deep Learning): Nhóm sử dụng phiên bản LTS (1.8.2) và CUDA phiên bản 1.11 - https://pytorch.org/
-pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio===0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111 #Windows
-pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111 #Linux
+# Cài đặt cho Windows
+pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio===0.8.2 \
+--extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
+
+# Cài đặt cho Linux
+pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 \
+--extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
 ```
 
 ```bash
@@ -96,6 +102,7 @@ pip3 install imutils
 ```bash
 # tkinter - Vẽ giao diện ứng dụng demo
 pip3 install tk # Windows: https://www.geeksforgeeks.org/how-to-install-tkinter-in-windows/
+
 sudo apt-get install python-tk # Linux: https://www.geeksforgeeks.org/how-to-install-tkinter-on-linux/
 ```
 
@@ -134,13 +141,15 @@ sudo apt-get install python-tk # Linux: https://www.geeksforgeeks.org/how-to-ins
 python3 Train.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-Ví dụ để huấn luyện mô hình cho tập dữ liệu `avenue` và phương thức dự đoán khung hình `pred` ta chạy lệnh:
+Ví dụ để huấn luyện mô hình cho tập dữ liệu `avenue` và phương thức
+dự đoán khung hình `pred` ta chạy lệnh:
 
 ```
 python3 Train.py --method pred --dataset_type avenue
 ```
 
-Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên, output mặc định sẽ được lưu ở thư mục
+Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên,
+output mặc định sẽ được lưu ở thư mục
 
 -   Mô hình đã huấn luyện: `./exp/avenue/pred/avenue/log/avenue_prediction_model.pth`
 -   Phẩn tử bộ nhớ: `./exp/avenue/pred/log/avenue_prediction_keys.pt`
@@ -177,10 +186,13 @@ Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham 
 python3 Evaluate.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-Ví dụ đánh giá mô hình với tập dữ liệu `avenue`, phương thức dự đoán khung hình `pred`, mô hình được lưu ở `./pre_trained_model/avenue_prediction_model.pth`, phần tử bộ nhớ được lưu ở `./pre_trained_model/avenue_prediction_keys.pt` ta chạy lệnh:
+Ví dụ đánh giá mô hình với tập dữ liệu `avenue`, phương thức dự đoán khung hình `pred`,
+mô hình được lưu ở `./pre_trained_model/avenue_prediction_model.pth`, phần tử bộ nhớ được
+lưu ở `./pre_trained_model/avenue_prediction_keys.pt` ta chạy lệnh:
 
 ```
-python3 Evaluate.py --method pred --dataset_type avenue --model_dir ./pre_trained_model/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/avenue_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type avenue --model_dir ./pre_trained_model/avenue_prediction_model.pth \
+--m_items_dir ./pre_trained_model/avenue_prediction_keys.pt
 ```
 
 Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên, output:
