@@ -17,8 +17,6 @@ parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')
-parser.add_argument('--test_batch_size', type=int,
-                    default=1, help='batch size for test')
 parser.add_argument('--epochs', type=int, default=60,
                     help='number of epochs for training')
 parser.add_argument('--loss_compact', type=float, default=0.1,
@@ -43,8 +41,6 @@ parser.add_argument('--msize', type=int, default=10,
                     help='number of the memory items')
 parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
-parser.add_argument('--num_workers_test', type=int, default=1,
-                    help='number of workers for the test loader')
 parser.add_argument('--dataset_type', type=str, default='ped2',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 parser.add_argument('--dataset_path', type=str,
@@ -91,8 +87,6 @@ test_size = len(test_dataset)
 
 train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.num_workers, drop_last=True)
-test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
-                             shuffle=False, num_workers=args.num_workers_test, drop_last=False)
 print('Loading dataset is finished')
 
 

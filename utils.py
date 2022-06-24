@@ -2,13 +2,11 @@ import numpy as np
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import math
 import copy
 from sklearn.metrics import roc_auc_score
 from sklearn import metrics
-from matplotlib.pyplot import figure
 from matplotlib import colors
 
 

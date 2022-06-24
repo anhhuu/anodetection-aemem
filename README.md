@@ -34,7 +34,7 @@ python3 Evaluate.py --dataset_type dataset_type --model_dir your_model.pth --m_i
 Example for `avenue`:
 
 ```
-python3 Evaluate.py --dataset_type avenue --model_dir ./my_trained_model/avenue_prediction_model.pth --m_items_dir ./my_trained_model/avenue_prediction_keys.pt
+python3 Evaluate.py --dataset_type avenue --model_dir ./pre_trained_model/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/avenue_prediction_keys.pt
 ```
 
 2. Run demo app

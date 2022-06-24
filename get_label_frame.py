@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 from scipy.io import loadmat
 data = loadmat(
-    r"/home/huu/thesis/anodetection-aemem/dataset/ped1/ped1.mat")
+    r"./dataset/ped1/ped1.mat")
 arr = np.zeros(0, np.int64)
 
 for rangeAno in data['gt'][0]:
