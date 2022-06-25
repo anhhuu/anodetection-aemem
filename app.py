@@ -1,8 +1,7 @@
 import argparse
 import threading
 import pandas as pd
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from matplotlib.animation import FuncAnimation
 import tkinter as tk
 import os
@@ -152,11 +151,10 @@ class App:
 
     def static_update(self):
         # Get a frame from the video source
-        test_frame, predicted_frame, anomaly_score = self.vid.get_static_frame(
-            self.iter_frame)
+        test_frame, predicted_frame, anomaly_score = self.vid.get_static_frame(self.iter_frame)
         optimal_threshold = self.vid.opt_threshold
         # Calculate difference image
-        test_img_detected, pred_img_detected, diff_img = self.ImgDiff.image_differences(
+        test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img = self.ImgDiff.image_differences(
             test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold)
 
         # Closes all the frames time when we finish processing for this frame
@@ -166,34 +164,24 @@ class App:
         self.prev_frame_time = self.new_frame_time
 
         # Show information on canvas
-        self.canvas.itemconfig(self.fps, text="fps: {}".format(
-            int(fps)))  # Update fps on canvas
-        self.canvas.itemconfig(
-            self.frame_th, text="frame: {}".format(self.iter_frame))
+        self.canvas.itemconfig(self.fps, text="fps: {}".format(int(fps)))  # Update fps on canvas
+        self.canvas.itemconfig(self.frame_th, text="frame: {}".format(self.iter_frame))
         if anomaly_score < optimal_threshold:
-            self.canvas.itemconfig(
-                self.anomaly_tag, fill='red', text="Abnormal: YES")
+            self.canvas.itemconfig(self.anomaly_tag, fill='red', text="Abnormal: YES")
         else:
-            self.canvas.itemconfig(
-                self.anomaly_tag, fill='white', text="Abnormal: NO")
+            self.canvas.itemconfig(self.anomaly_tag, fill='white', text="Abnormal: NO")
 
         # Convert opencv narray images to PIL images
         self.photo_test = ImageTk.PhotoImage(image=Image.fromarray(test_frame))
-        self.photo_pred = ImageTk.PhotoImage(
-            image=Image.fromarray(predicted_frame))
-        self.photo_diff = ImageTk.PhotoImage(image=Image.fromarray(diff_img))
-        self.detected_regions = ImageTk.PhotoImage(
-            image=Image.fromarray(test_img_detected))
+        self.photo_pred = ImageTk.PhotoImage(image=Image.fromarray(SSIM_diff_img))
+        self.photo_diff = ImageTk.PhotoImage(image=Image.fromarray(thresholded_img))
+        self.detected_regions = ImageTk.PhotoImage(image=Image.fromarray(test_img_detected))
 
         # Attach test, predicted, difference and detected_regions images on canvas
-        self.canvas.create_image(
-            self.frame_1_x_axis, self.bias_h, image=self.photo_test, anchor=tk.NW)
-        self.canvas.create_image(
-            self.frame_2_x_axis, self.bias_h, image=self.photo_pred, anchor=tk.NW)
-        self.canvas.create_image(
-            self.frame_3_x_axis, self.bias_h, image=self.photo_diff, anchor=tk.NW)
-        self.canvas.create_image(
-            self.frame_4_x_axis, self.bias_h, image=self.detected_regions, anchor=tk.NW)
+        self.canvas.create_image(self.frame_1_x_axis, self.bias_h, image=self.photo_test, anchor=tk.NW)
+        self.canvas.create_image(self.frame_2_x_axis, self.bias_h, image=self.photo_pred, anchor=tk.NW)
+        self.canvas.create_image(self.frame_3_x_axis, self.bias_h, image=self.photo_diff, anchor=tk.NW)
+        self.canvas.create_image(self.frame_4_x_axis, self.bias_h, image=self.detected_regions, anchor=tk.NW)
 
         # Function callback
         self.window.after(50, self.static_update)
@@ -340,22 +328,27 @@ class VideoCapture:
         test_video_index = self.vid[2]
         # load the two input images
         i = iter_frame
-        list_imageA = self.vid[0]  # test frames
-        frame_no = i + self.frame_sequence_length * test_video_index[i]
-        imageA = list_imageA[frame_no]
-        list_imageB = self.vid[1]  # pred frames
-        imageB = list_imageB[i]
+        test_frame_list = self.vid[0] 
+
+        # Get predicted frame
+        pred_frame_list = self.vid[1] 
+        current_pred_frame = pred_frame_list[i]
+
+        # Get ground-truth frame
+        map_index = test_video_index[i]
+        true_index_of_test_frame = i + self.frame_sequence_length * test_video_index[i+map_index*4]
+        current_test_frame = test_frame_list[true_index_of_test_frame]
 
         # resize image
-        w1, h1, c1 = imageA.shape
-        w2, h2, c2 = imageB.shape
+        w1, h1, c1 = current_test_frame.shape
+        w2, h2, c2 = current_pred_frame.shape
         if w1 != 256:
-            imageA = cv2.resize(imageA, (256, 256))
+            current_test_frame = cv2.resize(current_test_frame, (256, 256))
         if w2 != 256:
-            imageB = cv2.resize(imageB, (256, 256))
+            current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
 
         anomaly_score = self.frame_scores[i]
-        return imageA, imageB, anomaly_score
+        return current_test_frame, current_pred_frame, anomaly_score
 
     def get_dataset_frames(self):
         time_t = 0
@@ -426,7 +419,7 @@ parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
 parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
-parser.add_argument('--dataset_type', type=str, default='ped2',
+parser.add_argument('--dataset_type', type=str, default='ped1',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 
 args = parser.parse_args()
