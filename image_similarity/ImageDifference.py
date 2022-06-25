@@ -23,17 +23,18 @@ class ImageDifference():
             # images, ensuring that the difference image is returned
             (score, diff) = structural_similarity(grayA, grayB, full=True)
             diff = (diff * 255).astype("uint8")
-            diff = cv2.GaussianBlur(diff, (7, 7), sigmaX=3, sigmaY=3)
+            diff = cv2.GaussianBlur(diff, (3, 3), sigmaX=3, sigmaY=3)
             #cv2.imshow("diff image", cv2.resize(diff, None, fx=1, fy=1))
             #print("SSIM: {}".format(score))
 
             # threshold the difference image, followed by finding contours to
             # obtain the regions of the two input images that differ
-            thresh = cv2.threshold(
-                diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+            my_threshold = cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+            threshA = cv2.threshold(diff, 170, 255, cv2.THRESH_BINARY_INV)
+            thresh = threshA[1]
+            #thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
             #thresh = cv2.threshold(diff, 0, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C)[1]
-            cnts = cv2.findContours(
-                thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cnts = imutils.grab_contours(cnts)
 
             # loop over the contours
@@ -44,7 +45,7 @@ class ImageDifference():
                 (x, y, w, h) = cv2.boundingRect(c)
 
                 # Remove regions in-significant regions
-                if w < 5 or h < 20:
+                if w < 5 or h < 10:
                     continue
 
                 cv2.rectangle(imgA_clone, (x, y),
@@ -99,19 +100,6 @@ class ImageDifference():
                 cv2.rectangle(imgB_clone, (x, y),
                               (x + w, y + h), (255, 0, 0), 2)
 
-            # show the output images
-            #cv2.imshow("Test frame compared", cv2.resize(imageA, None, fx=1, fy=1))
-            #cv2.imwrite("Result_Original.png", imageA)
-            #cv2.imshow("Pred frame compared", cv2.resize(imageB, None, fx=1, fy=1))
-            #cv2.imwrite("Result_Modified.png", imageB)
-            #cv2.imshow("Diff", cv2.resize(diff, None, fx=1, fy=1))
-            #cv2.imwrite("Result_Diff.png", diff)
-            #cv2.imshow("Thresh", cv2.resize(thresh, None, fx=1, fy=1))
-            #cv2.imwrite("Result_Thresh.png", thresh)
-            # cv2.waitKey(0)
             return imgA_clone, imgB_clone
         else:
-            #cv2.imshow("Test frame compared", cv2.resize(imageA, None, fx=1, fy=1))
-            #cv2.imwrite("Result_Original.png", imageA)
-            #cv2.imshow("Pred frame compared", cv2.resize(imageB, None, fx=1, fy=1))
             return imgA_clone, imgB_clone
