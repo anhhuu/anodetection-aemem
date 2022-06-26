@@ -31,13 +31,13 @@ parser.add_argument('--lr', type=float, default=2e-4,
                     help='initial learning rate')
 parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=5,
+parser.add_argument('--t_length', type=int, default=3,
                     help='length of the frame sequences')
 parser.add_argument('--fdim', type=int, default=512,
                     help='channel dimension of the features')
 parser.add_argument('--mdim', type=int, default=512,
                     help='channel dimension of the memory items')
-parser.add_argument('--msize', type=int, default=10,
+parser.add_argument('--msize', type=int, default=11,
                     help='number of the memory items')
 parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
@@ -70,7 +70,6 @@ else:
 torch.backends.cudnn.enabled = True
 
 train_folder = args.dataset_path+"/"+args.dataset_type+"/training/frames"
-test_folder = args.dataset_path+"/"+args.dataset_type+"/testing/frames"
 
 # Loading dataset
 print('Loading dataset...')
@@ -78,12 +77,8 @@ train_dataset = DataLoader(train_folder, transforms.Compose([
     transforms.ToTensor(),
 ]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
-test_dataset = DataLoader(test_folder, transforms.Compose([
-    transforms.ToTensor(),
-]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
 train_size = len(train_dataset)
-test_size = len(test_dataset)
 
 train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.num_workers, drop_last=True)
@@ -135,8 +130,9 @@ for epoch in range(args.epochs):
         imgs = Variable(imgs).cuda()
 
         if args.method == 'pred':
+            last_index = (args.t_length - 1) * 3
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
-                imgs[:, 0:12], m_items, True)
+                imgs[:, 0:last_index], m_items, True)
 
         else:
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
@@ -144,7 +140,9 @@ for epoch in range(args.epochs):
 
         optimizer.zero_grad()
         if args.method == 'pred':
-            loss_pixel = torch.mean(loss_func_mse(outputs, imgs[:, 12:]))
+            first_index = (args.t_length - 1) * 3
+            loss_pixel = torch.mean(loss_func_mse(
+                outputs, imgs[:, first_index:]))
         else:
             loss_pixel = torch.mean(loss_func_mse(outputs, imgs))
 
