@@ -127,7 +127,7 @@ print('Start Evaluation of:', args.dataset_type + ',', 'method:',
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
     if args.method == 'pred':
-        from_frame = 4+label_length
+        from_frame = (args.t_length-1)+label_length
         to_frame = videos[video_name]['length']+label_length
         frame_labels = labels[0][from_frame:to_frame]
         labels_list = np.append(labels_list, frame_labels)
@@ -162,7 +162,7 @@ if not os.path.exists(output_frames_dir):
 # recons: img ndim = 4, shape ([1, 3, 256, 256])
 for k, (imgs) in enumerate(test_batch):
     if args.method == 'pred':
-        if k == label_length-4*(video_num+1):
+        if k == label_length-(args.t_length-1)*(video_num+1):
             video_num += 1
             label_length += videos[videos_list[video_num]
                                    .split('/')[-1]]['length']
@@ -176,13 +176,13 @@ for k, (imgs) in enumerate(test_batch):
 
     if args.method == 'pred':
         outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = model.forward(
-            imgs[:, 0:3*4], m_items_test, False)
+            imgs[:, 0:3*(args.t_length-1)], m_items_test, False)
         mse_imgs = torch.mean(loss_func_mse(
-            (outputs[0]+1)/2, (imgs[0, 3*4:]+1)/2)).item()
+            (outputs[0]+1)/2, (imgs[0, 3*(args.t_length-1):]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
         # Calculating the threshold for updating at the test time
-        point_sc = point_score(outputs, imgs[:, 3*4:])
+        point_sc = point_score(outputs, imgs[:, 3*(args.t_length-1):])
 
         if args.is_save_output == 'true':
             num_frame = len(test_batch)
