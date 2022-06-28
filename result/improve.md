@@ -17,7 +17,7 @@ Training is finished
 Training is taken:  1:52:16.362414
 
 -----------------------------------------------------------------------------
-!!python Evaluate.py --method pred --dataset_type ped2 --t_length=4 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
+!python Evaluate.py --method pred --dataset_type ped2 --t_length=4 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
 
 Start time: 27/06/2022 11:09:23
 Start Evaluation of: ped2, method: pred, trained model used: ped2
@@ -56,6 +56,32 @@ len of anomaly score: 15282
 The result of avenue
 AUC: 82.09489167921429 %
 Evaluate is taken:  1:39:49.617078
+```
+
+```
+!python Train.py --method pred --t_length 4 --msize 11 --dataset_type avenue
+
+Start time: 27/06/2022 15:33:34
+Dataset:  avenue
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  12:30:34.931892
+
+-----------------------------------------------------------------------------
+!python Evaluate.py --method pred --dataset_type avenue --t_length=4 --model_dir ./exp/avenue/pred/log/avenue_prediction_model.pth --m_items_dir ./exp/avenue/pred/log/avenue_prediction_keys.pt
+
+Start time: 28/06/2022 04:48:10
+Start Evaluation of: avenue, method: pred, trained model used: avenue
+Number of frames: 15324
+len of anomaly score: 15261
+The result of avenue
+AUC: 84.53195755536498 %
+Evaluate is taken:  1:32:23.771134
 ```
 
 # USCD PED1
