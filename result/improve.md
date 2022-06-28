@@ -84,6 +84,29 @@ AUC: 84.53195755536498 %
 Evaluate is taken:  1:32:23.771134
 ```
 
+```
+!python Train.py --method pred --lr 1e-4 --dataset_type ped2 & L1Loss
+Start time: 28/06/2022 10:32:02
+Dataset:  ped2
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  3:16:21.048370
+
+-----------------------------------------------------------------------------
+Start time: 28/06/2022 20:54:01
+Start Evaluation of: ped2, method: pred, trained model used: ped2
+Number of frames: 2010
+len of anomaly score: 1962
+The result of ped2
+AUC: 93.65190238971915 %
+Evaluate is taken:  0:01:26.719431
+```
+
 # USCD PED1
 
 ## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
