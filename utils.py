@@ -10,7 +10,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn import metrics
 from matplotlib.pyplot import figure
 from matplotlib import colors
-
+import cv2
 
 def rmse(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
@@ -138,3 +138,62 @@ def score_sum(list1, list2, alpha):
         list_result.append(sum_score)
 
     return list_result
+
+
+def load_pixelLabel_frames(dataset_type='ped2'):
+    label_input_path = []
+    label_dir = []
+    label_dir_distinct = []
+    cur_path = './dataset/' + dataset_type + '/testing/labels'
+    for path, _, files in os.walk(cur_path):
+        for name in files:
+            if(path not in label_dir_distinct):
+                label_dir_distinct.append(path)
+            label_input_path.append(os.path.join(path, name))
+            label_dir.append(path)
+    label_input_path.sort()
+    label_dir.sort()
+    label_dir_distinct.sort()
+
+    label_list = []
+    for i in range(len(label_input_path)):
+        label_img = cv2.imread(label_input_path[i])
+        label_list.append(label_img)
+
+    return label_list
+
+
+def load_predict_frames(dataset_type):
+    pred_input_path = []
+    cur_path = './dataset/' + dataset_type + '/output/frames'
+    for path, _, files in os.walk(cur_path):
+        for name in files:
+            pred_input_path.append(os.path.join(path, name))
+    pred_input_path.sort()
+
+    pred_input_imgs = []
+    for i in range(len(pred_input_path)):
+        img = cv2.imread(pred_input_path[i])
+        pred_input_imgs.append(img)
+
+    return pred_input_imgs
+
+
+def AUC_pixel_level():
+    labels_frames = load_pixelLabel_frames(dataset_type='ped2')
+    predicted_frames = load_predict_frames(dataset_type='ped2')
+    
+
+def optimalThreshold(anomal_scores, labels):
+    y_true = 1 - labels[0, :1962]
+    y_true = np.squeeze(y_true)
+    y_score = np.squeeze(anomal_scores[:1962])
+    fpr, tpr, threshold = metrics.roc_curve(y_true, y_score)
+    frame_auc = metrics.roc_auc_score(y_true, y_score)
+    print("AUC: {}".format(frame_auc))
+    # calculate the g-mean for each threshold
+    gmeans = np.sqrt(tpr * (1-fpr))
+    # locate the index of the largest g-mean
+    ix = np.argmax(gmeans)
+    print('Best Threshold=%f, G-Mean=%.3f' % (threshold[ix], gmeans[ix]))
+    return threshold[ix]

@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 from tkinter import filedialog
 import matplotlib
 matplotlib.use("TkAgg")
+from app_utils import write_score
+
 
 LARGE_FONT = ("Verdana", 12)
 
@@ -23,7 +25,7 @@ DEFAULT_DATASET_NAME = "ped2"
 DEFAULT_METHOD = "pred"
 DEFAULT_FRAME_PRED_INPUT = 4
 DEFAULT_T_LENGTH = 5
-
+DEFAULT_DELAY = 5
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
     minus_h = window_H - frame_h
@@ -50,13 +52,13 @@ class App:
         self.setup_Buttons()
 
         # create a video source (by default this will try to open the computer webcam)
-        self.vid = VideoCapture(
-            video_source, self.current_data_path, self.dataset_type, frame_sequence_length=t_length-1)
+        self.vid = VideoCapture(video_source, self.current_data_path, self.dataset_type, frame_sequence_length=t_length-1)
         self.numPredFrame = len(self.vid.vid[1])
 
         # create an ImgDiff object for do difference on images
         self.ImgDiff = id.ImageDifference()
 
+        #self.write_score = write_score()
         # update ktinker canvas
         if video_source == 0:
             self.update()
@@ -151,11 +153,19 @@ class App:
 
     def static_update(self):
         # Get a frame from the video source
-        test_frame, predicted_frame, anomaly_score = self.vid.get_static_frame(self.iter_frame)
+        test_frame, predicted_frame, anomaly_score, pixel_label_frame = self.vid.get_static_frame(self.iter_frame)
         optimal_threshold = self.vid.opt_threshold
         # Calculate difference image
-        test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img = self.ImgDiff.image_differences(
-            test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold)
+
+        # *** PIXEL LEVEL
+        #test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img = self.ImgDiff.image_differences_pixel_label(
+            #test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold, pixel_label_frame)
+
+        # *** FRAME LEVEL
+        test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img, SSIM_score = self.ImgDiff.image_differences(
+        test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold)
+        #self.write_score.save_score(SSIM_score)
+        
 
         # Closes all the frames time when we finish processing for this frame
         self.new_frame_time = time.time()
@@ -184,7 +194,7 @@ class App:
         self.canvas.create_image(self.frame_4_x_axis, self.bias_h, image=self.detected_regions, anchor=tk.NW)
 
         # Function callback
-        self.window.after(50, self.static_update)
+        self.window.after(DEFAULT_DELAY, self.static_update)
         if self.iter_frame == len(self.vid.vid[1]):
             self.iter_frame = 0
         else:
@@ -305,12 +315,10 @@ class VideoCapture:
             test_frames, predicted_framese, test_num_video_index = self.get_dataset_frames()
             self.vid = [test_frames, predicted_framese, test_num_video_index]
             # load frame
-            self.frame_scores = np.load(
-                self.data_path[-1] + 'output/anomaly_score.npy')
-            self.labels = np.load(
-                './data/frame_labels_' + self.dataset_type + '.npy')
-            self.opt_threshold = self.optimalThreshold(
-                self.frame_scores, self.labels)
+            self.frame_scores = np.load(self.data_path[-1] + 'output/anomaly_score.npy')
+            self.labels = np.load('./data/frame_labels_' + self.dataset_type + '.npy')
+            self.pixelLabels = self.load_pixelLabel_frames()
+            self.opt_threshold = self.optimalThreshold(self.frame_scores, self.labels)
 
     def get_frame(self):
         # if self.vid.isOpened():
@@ -326,8 +334,12 @@ class VideoCapture:
 
     def get_static_frame(self, iter_frame):
         test_video_index = self.vid[2]
+        
         # load the two input images
         i = iter_frame
+
+        if i == 352:
+            print()
         test_frame_list = self.vid[0] 
 
         # Get predicted frame
@@ -339,6 +351,9 @@ class VideoCapture:
         true_index_of_test_frame = i + self.frame_sequence_length * test_video_index[i+map_index*4]
         current_test_frame = test_frame_list[true_index_of_test_frame]
 
+        # Get pixel-level label frame
+        pixel_level_label = self.pixelLabels[true_index_of_test_frame]
+
         # resize image
         w1, h1, c1 = current_test_frame.shape
         w2, h2, c2 = current_pred_frame.shape
@@ -348,7 +363,7 @@ class VideoCapture:
             current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
 
         anomaly_score = self.frame_scores[i]
-        return current_test_frame, current_pred_frame, anomaly_score
+        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label
 
     def get_dataset_frames(self):
         time_t = 0
@@ -404,6 +419,31 @@ class VideoCapture:
         print('Best Threshold=%f, G-Mean=%.3f' % (threshold[ix], gmeans[ix]))
         return threshold[ix]
 
+    def load_pixelLabel_frames(self):
+        label_input_path = []
+        label_dir = []
+        label_dir_distinct = []
+        cur_path = './dataset/' + self.dataset_type + '/testing/labels'
+        for path, _, files in os.walk(cur_path):
+            for name in files:
+                if(path not in label_dir_distinct):
+                    label_dir_distinct.append(path)
+                label_input_path.append(os.path.join(path, name))
+                label_dir.append(path)
+        label_input_path.sort()
+        label_dir.sort()
+        label_dir_distinct.sort()
+
+        label_list = []
+        for i in range(len(label_input_path)):
+            label_img = cv2.imread(label_input_path[i])
+            label_img.astype("uint8")
+            label_img = cv2.resize(label_img, (256, 256))
+            label_img = cv2.cvtColor(label_img, cv2.COLOR_BGR2GRAY)
+            label_list.append(label_img)
+
+        return label_list
+
     # Release the video source when the object is destroyed
     def __del__(self):
         if self.type == 0:
@@ -419,7 +459,7 @@ parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
 parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
-parser.add_argument('--dataset_type', type=str, default='ped1',
+parser.add_argument('--dataset_type', type=str, default='ped2',
                     help='type of dataset: ped1, ped2, avenue, shanghai')
 
 args = parser.parse_args()

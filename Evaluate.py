@@ -13,48 +13,31 @@ from model.Reconstruction import *
 from utils import *
 import glob
 import argparse
+import cv2
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
-parser.add_argument('--batch_size', type=int, default=4,
-                    help='batch size for training')
-parser.add_argument('--test_batch_size', type=int,
-                    default=1, help='batch size for test')
-parser.add_argument('--h', type=int, default=256,
-                    help='height of input images')
+parser.add_argument('--batch_size', type=int, default=4, help='batch size for training')
+parser.add_argument('--test_batch_size', type=int, default=1, help='batch size for test')
+parser.add_argument('--h', type=int, default=256, help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--method', type=str, default='pred',
-                    help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=5,
-                    help='length of the frame sequences')
-parser.add_argument('--fdim', type=int, default=512,
-                    help='channel dimension of the features')
-parser.add_argument('--mdim', type=int, default=512,
-                    help='channel dimension of the memory items')
-parser.add_argument('--msize', type=int, default=10,
-                    help='number of the memory items')
-parser.add_argument('--alpha', type=float, default=0.6,
-                    help='weight for the anomality score')
-parser.add_argument('--th', type=float, default=0.01,
-                    help='threshold for test updating')
-parser.add_argument('--num_workers', type=int, default=2,
-                    help='number of workers for the train loader')
-parser.add_argument('--num_workers_test', type=int, default=1,
-                    help='number of workers for the test loader')
-parser.add_argument('--dataset_type', type=str, default='ped1',
-                    help='type of dataset: ped1, ped2, avenue, shanghai')
-parser.add_argument('--dataset_path', type=str,
-                    default='./dataset', help='directory of data')
-parser.add_argument('--model_dir', type=str,
-                    default='./my_trained_model/ped1_prediction_model.pth', help='directory of model')
-parser.add_argument('--m_items_dir', type=str,
-                    default='./my_trained_model/ped1_prediction_keys.pt', help='directory of model')
-parser.add_argument('--exp_dir', type=str, default='log',
-                    help='directory of log')
-parser.add_argument('--is_save_output', type=str, default='true',
-                    help='is save predicted image')
+parser.add_argument('--method', type=str, default='pred', help='The target task for anoamly detection')
+parser.add_argument('--t_length', type=int, default=5, help='length of the frame sequences')
+parser.add_argument('--fdim', type=int, default=512, help='channel dimension of the features')
+parser.add_argument('--mdim', type=int, default=512, help='channel dimension of the memory items')
+parser.add_argument('--msize', type=int, default=10, help='number of the memory items')
+parser.add_argument('--alpha', type=float, default=0.6, help='weight for the anomality score')
+parser.add_argument('--th', type=float, default=0.01, help='threshold for test updating')
+parser.add_argument('--num_workers', type=int, default=2, help='number of workers for the train loader')
+parser.add_argument('--num_workers_test', type=int, default=1, help='number of workers for the test loader')
+parser.add_argument('--dataset_type', type=str, default='ped1', help='type of dataset: ped1, ped2, avenue, shanghai')
+parser.add_argument('--dataset_path', type=str, default='./dataset', help='directory of data')
+parser.add_argument('--model_dir', type=str, default='./my_trained_model/ped1_prediction_model.pth', help='directory of model')
+parser.add_argument('--m_items_dir', type=str, default='./my_trained_model/ped1_prediction_keys.pt', help='directory of model')
+parser.add_argument('--exp_dir', type=str, default='log', help='directory of log')
+parser.add_argument('--is_save_output', type=str, default='true', help='is save predicted image')
 
 start_time = datetime.now()
 print("Start time:", start_time.strftime("%d/%m/%Y %H:%M:%S"))
@@ -78,8 +61,7 @@ test_folder = args.dataset_path+"/"+args.dataset_type+"/testing/frames"
 
 # load the dataset and convert a ndarray image/frame into a float tensor. Then scale the image/frame
 # pixel intensity value in the range [-1, 1]
-test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(), ]),
-                          resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(), ]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 # dataset length
 test_size = len(test_dataset)
 
@@ -89,8 +71,7 @@ test_size = len(test_dataset)
 #   + shuffle: not shuffle due to sequential data
 #   + num_workers: how many subprocesses to use for data loading
 #   + drop_last: If the size of dataset is not divisible by the batch size, then the last batch will be smaller
-test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
-                             shuffle=False, num_workers=args.num_workers_test, drop_last=False)
+test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size, shuffle=False, num_workers=args.num_workers_test, drop_last=False)
 
 # define Mean Error Loss
 loss_func_mse = nn.MSELoss(reduction='none')
@@ -129,8 +110,7 @@ elif "avenue" in args.model_dir:
 elif "shanghai" in args.model_dir:
     trained_model_using = "shanghai"
 
-print('Start Evaluation of:', args.dataset_type + ',', 'method:',
-      args.method + ',', 'trained model used:', trained_model_using)
+print('Start Evaluation of:', args.dataset_type + ',', 'method:', args.method + ',', 'trained model used:', trained_model_using)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):
@@ -173,13 +153,11 @@ for k, (imgs) in enumerate(test_batch):
     if args.method == 'pred':
         if k == label_length-4*(video_num+1):
             video_num += 1
-            label_length += videos[videos_list[video_num]
-                                   .split('/')[-1]]['length']
+            label_length += videos[videos_list[video_num].split('/')[-1]]['length']
     else:
         if k == label_length:
             video_num += 1
-            label_length += videos[videos_list[video_num]
-                                   .split('/')[-1]]['length']
+            label_length += videos[videos_list[video_num].split('/')[-1]]['length']
 
     imgs = Variable(imgs).cuda()
 
@@ -217,10 +195,8 @@ for k, (imgs) in enumerate(test_batch):
             cv2.imwrite(img_name_dir, img_out_clone)
 
     else:
-        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(
-            imgs, m_items_test, False)
-        mse_imgs = torch.mean(loss_func_mse(
-            (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
+        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(imgs, m_items_test, False)
+        mse_imgs = torch.mean(loss_func_mse((outputs[0]+1)/2, (imgs[0]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
         # Calculating the threshold for updating at the test time
@@ -259,8 +235,7 @@ for k, (imgs) in enumerate(test_batch):
     psnr_index = videos_list[video_num].split('/')[-1]
     psnr_list[psnr_index].append(psnr_score)
     # append compactness lost of current frame to compactness list
-    feature_distance_list[videos_list[video_num].split(
-        '/')[-1]].append(mse_feas)
+    feature_distance_list[videos_list[video_num].split('/')[-1]].append(mse_feas)
 
 
 # Measuring the abnormality score and the AUC
@@ -274,12 +249,10 @@ for video in sorted(videos_list):
 
     feature_distance_list_of_video = feature_distance_list[video_name]
     # min-max normalization for compactness loss
-    anomaly_score_list_inv_of_video = anomaly_score_list_inv(
-        feature_distance_list_of_video)
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv( feature_distance_list_of_video)
 
     # Sum score for anomaly rate
-    score = score_sum(anomaly_score_list_of_video,
-                      anomaly_score_list_inv_of_video, args.alpha)
+    score = score_sum(anomaly_score_list_of_video, anomaly_score_list_inv_of_video, args.alpha)
 
     # Append score to total list
     anomaly_score_total_list += score

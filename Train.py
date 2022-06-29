@@ -12,6 +12,8 @@ from model.utils import DataLoader
 from utils import *
 from datetime import datetime
 import argparse
+from pytorchtools import EarlyStopping
+
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -78,23 +80,16 @@ test_folder = args.dataset_path+"/"+args.dataset_type+"/testing/frames"
 
 # Loading dataset
 print('Loading dataset...')
-train_dataset = DataLoader(train_folder, transforms.Compose([
-    transforms.ToTensor(),
-]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+train_dataset = DataLoader(train_folder, transforms.Compose([transforms.ToTensor(),]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
-test_dataset = DataLoader(test_folder, transforms.Compose([
-    transforms.ToTensor(),
-]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(),]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
 train_size = len(train_dataset)
 test_size = len(test_dataset)
 
-train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
-                              shuffle=True, num_workers=args.num_workers, drop_last=True)
-test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
-                             shuffle=False, num_workers=args.num_workers_test, drop_last=False)
+train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
+test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size, shuffle=False, num_workers=args.num_workers_test, drop_last=False)
 print('Loading dataset is finished')
-
 
 # Model setting
 print('Model setting...')
@@ -104,8 +99,7 @@ if args.method == 'pred':
     model = convAE(args.c, args.t_length, args.msize, args.fdim, args.mdim)
 else:
     from model.Reconstruction import *
-    model = convAE(args.c, memory_size=args.msize,
-                   feature_dim=args.fdim, key_dim=args.mdim)
+    model = convAE(args.c, memory_size=args.msize, feature_dim=args.fdim, key_dim=args.mdim)
 params_encoder = list(model.encoder.parameters())
 params_decoder = list(model.decoder.parameters())
 params = params_encoder + params_decoder
@@ -125,6 +119,9 @@ sys.stdout = f
 
 loss_func_mse = nn.MSELoss(reduction='none')
 
+#import pytorch_ssim
+#loss_ssim = pytorch_ssim.SSIM()
+
 # Training
 print('Start training...')
 m_items = F.normalize(torch.rand((args.msize, args.mdim),
@@ -141,16 +138,17 @@ for epoch in range(args.epochs):
         imgs = Variable(imgs).cuda()
 
         if args.method == 'pred':
+            frame_len = (args.t_length - 1) * 3
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
-                imgs[:, 0:12], m_items, True)
+                imgs[:, 0:frame_len], m_items, True)
 
         else:
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
-                imgs, m_items, True)
+                imgs, m_items, True)                                                    
 
         optimizer.zero_grad()
         if args.method == 'pred':
-            loss_pixel = torch.mean(loss_func_mse(outputs, imgs[:, 12:]))
+            loss_pixel = torch.mean(loss_func_mse(outputs, imgs[:, frame_len:]))
         else:
             loss_pixel = torch.mean(loss_func_mse(outputs, imgs))
 
