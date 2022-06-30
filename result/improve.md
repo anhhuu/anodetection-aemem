@@ -130,6 +130,31 @@ AUC: 95.04808092544931 %
 Evaluate is taken:  0:17:33.001924
 ```
 
+```
+!python Train.py --method pred --msize 11 --dataset_type ped2
+
+Start time: 30/06/2022 13:13:07
+Dataset:  ped2
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  1:58:58.595654
+
+!python Evaluate.py --method pred --dataset_type ped2 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
+
+Start time: 30/06/2022 15:30:07
+Start Evaluation of: ped2, method: pred, trained model used: ped2
+Number of frames: 2010
+len of anomaly score: 1962
+The result of ped2
+AUC: 90.15504295718722 %
+Evaluate is taken:  0:16:47.027836
+```
+
 # CUHK Avenue
 
 ## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
@@ -214,6 +239,8 @@ Evaluate is taken:  2:12:31.125297
 
 # USCD PED1
 
+## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
+
 ```
 !python Train.py --method pred --lr 15e-5 --epoch 70 --dataset_type ped1
 
@@ -239,5 +266,3 @@ The result of ped1
 AUC: 75.83966399516184 %
 Evaluate is taken:  2:02:43.131632
 ```
-
-## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
