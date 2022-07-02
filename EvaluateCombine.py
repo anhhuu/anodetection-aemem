@@ -28,7 +28,7 @@ parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--alpha', type=float, default=0.6,
                     help='weight for the anomality score')
-parser.add_argument('--recon_alpha', type=float, default=0.7,
+parser.add_argument('--recon_alpha', type=float, default=0.6,
                     help='weight for the anomality score')
 parser.add_argument('--th', type=float, default=0.01,
                     help='threshold for test updating')
@@ -41,9 +41,9 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--pred_model_dir', type=str,
-                    default='./pre_trained_model/ped2_prediction_model.pth', help='directory of model')
+                    default='./paper_trained_model/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--pred_m_items_dir', type=str,
-                    default='./pre_trained_model/ped2_prediction_keys.pt', help='directory of model')
+                    default='./paper_trained_model/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--recon_model_dir', type=str,
                     default='./paper_trained_model/ped2_reconstruction_model.pth', help='directory of model')
 parser.add_argument('--recon_m_items_dir', type=str,
@@ -179,7 +179,7 @@ for k, (imgs) in enumerate(test_batch):
 
     imgs = Variable(imgs).cuda()
 
-    if k == pre_label_length:
+    if k % (args.t_length-1) == 0:
         for i in range(args.t_length-1):
             # do recon
             imgs_input = imgs[:, (3*i):(3*(i+1))]
@@ -216,7 +216,7 @@ for k, (imgs) in enumerate(test_batch):
             recon_feature_distance_list[videos_list[video_num].split(
                 '/')[-1]].append(mse_feas)
 
-            if args.is_save_output == 'true':
+            if args.is_save_output == 'true' and k == pre_label_length:
                 num_frame = len(test_batch)
                 num_digit_of_num_frame = len(str(num_frame))
 
@@ -322,7 +322,7 @@ for video in sorted(videos_list):
                       anomaly_score_list_inv_of_video, args.alpha)
 
     # Append score to total list
-    anomaly_score_total_list += recon_score
+    anomaly_score_total_list += recon_score[:4]
     anomaly_score_total_list += score
 
 
@@ -342,7 +342,8 @@ plot_ROC(anomaly_score_total_list, np.expand_dims(
 plot_anomaly_scores(anomaly_score_total_list,
                     labels[0], log_dir, args.dataset_type, "recon+pred", trained_model_using)
 
-np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
+np.save(os.path.join(output_dir, 'recon_pred_anomaly_score.npy'),
+        anomaly_score_total_list)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
