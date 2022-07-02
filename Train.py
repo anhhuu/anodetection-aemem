@@ -31,13 +31,13 @@ parser.add_argument('--lr', type=float, default=2e-4,
                     help='initial learning rate')
 parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
-parser.add_argument('--t_length', type=int, default=3,
+parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--fdim', type=int, default=512,
                     help='channel dimension of the features')
 parser.add_argument('--mdim', type=int, default=512,
                     help='channel dimension of the memory items')
-parser.add_argument('--msize', type=int, default=11,
+parser.add_argument('--msize', type=int, default=10,
                     help='number of the memory items')
 parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
