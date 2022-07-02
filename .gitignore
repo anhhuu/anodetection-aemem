@@ -7,4 +7,5 @@ raw-dataset
 __pycache__
 pre_trained_model
 output_dataset
-paper_trained_model
+paper_trained_model/*.pt
+paper_trained_model/*.pth
