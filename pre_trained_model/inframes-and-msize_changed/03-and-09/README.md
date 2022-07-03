@@ -10,7 +10,7 @@ python3 Train.py --method <method> --t_length 4 --msize 9 --dataset_type <datase
 ### Evaluate
 
 ```
-python3 Evaluate.py --method <method> --dataset_type <dataset_type> --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/01/<model>.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/01/<keys>.pt
+python3 Evaluate.py --method <method> --dataset_type <dataset_type> --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/<model>.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/<keys>.pt
 ```
 
 ## Result
@@ -38,7 +38,7 @@ Training is finished
 Training is taken:  1:58:58.595654
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/01/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/01/ped2_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_keys.pt
 
 Start time: 30/06/2022 15:30:07
 Start Evaluation of: ped2, method: pred, trained model used: ped2

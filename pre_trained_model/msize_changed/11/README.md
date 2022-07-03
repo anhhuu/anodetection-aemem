@@ -10,7 +10,7 @@
 ### Evaluate
 
 ```
-!python Evaluate.py --method <method> --dataset_type <dataset_type> --model_dir ./pre_trained_model/msize_changed/02/<model>.pth --m_items_dir ./pre_trained_model/msize_changed/02/<keys>.pt
+!python Evaluate.py --method <method> --dataset_type <dataset_type> --model_dir ./pre_trained_model/msize_changed/11/<model>.pth --m_items_dir ./pre_trained_model/msize_changed/11/<keys>.pt
 ```
 
 ## Result
@@ -38,7 +38,7 @@ Training is finished
 Training is taken:  1:58:51.011772
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type ped2 --model_dir ./pre_trained_model/msize_changed/02/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/msize_changed/02/ped2_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type ped2 --model_dir ./pre_trained_model/msize_changed/11/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/msize_changed/11/ped2_prediction_keys.pt
 
 Start time: 03/07/2022 16:11:26
 Start Evaluation of: ped2, method: pred, trained model used: ped2
