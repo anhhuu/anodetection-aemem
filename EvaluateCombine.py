@@ -41,13 +41,13 @@ parser.add_argument('--dataset_type', type=str, default='ped2',
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--pred_model_dir', type=str,
-                    default='./paper_trained_model/ped2_prediction_model.pth', help='directory of model')
+                    default='./pre_trained_model/defaults/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--pred_m_items_dir', type=str,
-                    default='./paper_trained_model/ped2_prediction_keys.pt', help='directory of model')
+                    default='./pre_trained_model/defaults/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--recon_model_dir', type=str,
-                    default='./paper_trained_model/ped2_reconstruction_model.pth', help='directory of model')
+                    default='./pre_trained_model/papers/ped2_prediction_model.pth', help='directory of model')
 parser.add_argument('--recon_m_items_dir', type=str,
-                    default='./paper_trained_model/ped2_reconstruction_keys.pt', help='directory of model')
+                    default='./pre_trained_model/papers/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 parser.add_argument('--is_save_output', type=str, default='true',

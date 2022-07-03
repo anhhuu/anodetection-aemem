@@ -1,33 +1,5 @@
 # USCD PED2
 
-## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
-
-```
-!python Train.py --method pred --t_length 4 --msize 11 --dataset_type ped2
-
-Start time: 27/06/2022 08:25:14
-Dataset:  ped2
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  1:52:16.362414
-
------------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type ped2 --t_length=4 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
-
-Start time: 27/06/2022 11:09:23
-Start Evaluation of: ped2, method: pred, trained model used: ped2
-Number of frames: 2010
-len of anomaly score: 1974
-The result of ped2
-AUC: 96.49785942905118 %
-Evaluate is taken:  0:11:37.709379
-```
-
 ```
 !python Train.py --method pred --lr 1e-4 --dataset_type ped2 & L1Loss
 
@@ -105,9 +77,9 @@ Evaluate is taken:  0:09:43.650188
 ```
 
 ```
-!python Train.py --method pred --t_length 4 --dataset_type ped2
+!python Train.py --method pred --msize 9 --t_length 6 --dataset_type ped2
 
-Start time: 29/06/2022 15:04:45
+Start time: 01/07/2022 07:26:32
 Dataset:  ped2
 Method:  pred
 Loading dataset...
@@ -116,153 +88,16 @@ Model setting...
 Setting up model is finished
 Start training and logging into file
 Training is finished
-Training is taken:  1:58:53.648046
+Training is taken:  1:58:54.278047
 
 -----------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
+!python Evaluate.py --method pred --dataset_type ped2 --t_length 6 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
 
-Start time: 29/06/2022 17:15:25
+Start time: 01/07/2022 09:53:02
 Start Evaluation of: ped2, method: pred, trained model used: ped2
 Number of frames: 2010
-len of anomaly score: 1974
+len of anomaly score: 1950
 The result of ped2
-AUC: 95.04808092544931 %
-Evaluate is taken:  0:17:33.001924
-```
-
-```
-!python Train.py --method pred --msize 11 --dataset_type ped2
-
-Start time: 30/06/2022 13:13:07
-Dataset:  ped2
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  1:58:58.595654
-
-!python Evaluate.py --method pred --dataset_type ped2 --model_dir ./exp/ped2/pred/log/ped2_prediction_model.pth --m_items_dir ./exp/ped2/pred/log/ped2_prediction_keys.pt
-
-Start time: 30/06/2022 15:30:07
-Start Evaluation of: ped2, method: pred, trained model used: ped2
-Number of frames: 2010
-len of anomaly score: 1962
-The result of ped2
-AUC: 90.15504295718722 %
-Evaluate is taken:  0:16:47.027836
-```
-
-# CUHK Avenue
-
-## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
-
-```
-!python Train.py --method pred --t_length 3 --msize 11 --dataset_type avenue
-
-Start time: 26/06/2022 18:25:07
-Dataset:  avenue
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  11:23:56.984436
-
------------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type avenue t_length 3 --model_dir ./exp/avenue/pred/log/avenue_prediction_model.pth --m_items_dir ./exp/avenue/pred/log/avenue_prediction_keys.pt
-
-Start time: 27/06/2022 06:21:18
-Start Evaluation of: avenue, method: pred, trained model used: avenue
-Number of frames: 15324
-len of anomaly score: 15282
-The result of avenue
-AUC: 82.09489167921429 %
-Evaluate is taken:  1:39:49.617078
-```
-
-```
-!python Train.py --method pred --t_length 4 --msize 11 --dataset_type avenue
-
-Start time: 27/06/2022 15:33:34
-Dataset:  avenue
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  12:30:34.931892
-
------------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type avenue --t_length=4 --model_dir ./exp/avenue/pred/log/avenue_prediction_model.pth --m_items_dir ./exp/avenue/pred/log/avenue_prediction_keys.pt
-
-Start time: 28/06/2022 04:48:10
-Start Evaluation of: avenue, method: pred, trained model used: avenue
-Number of frames: 15324
-len of anomaly score: 15261
-The result of avenue
-AUC: 84.53195755536498 %
-Evaluate is taken:  1:32:23.771134
-```
-
-```
-!python Train.py --method pred --t_length 4 --dataset_type avenue
-
-Start time: 29/06/2022 17:46:56
-Dataset:  avenue
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  16:49:34.465922
-
------------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type avenue --t_length 4 --model_dir ./exp/avenue/pred/log/avenue_prediction_model.pth --m_items_dir ./exp/avenue/pred/log/avenue_prediction_keys.pt
-
-Start time: 30/06/2022 10:53:16
-Start Evaluation of: avenue, method: pred, trained model used: avenue
-Number of frames: 15324
-len of anomaly score: 15261
-The result of avenue
-AUC: 83.88865716257415 %
-Evaluate is taken:  2:12:31.125297
-```
-
-# USCD PED1
-
-## RUN ON COLAB (Tesla P100-PCIE-16GB) WITH MY TRAINED MODEL
-
-```
-!python Train.py --method pred --lr 15e-5 --epoch 70 --dataset_type ped1
-
-Start time: 28/06/2022 18:43:55
-Dataset:  ped1
-Method:  pred
-Loading dataset...
-Loading dataset is finished
-Model setting...
-Setting up model is finished
-Start training and logging into file
-Training is finished
-Training is taken:  9:28:09.051179
-
------------------------------------------------------------------------------
-!python Evaluate.py --method pred --dataset_type ped1 --model_dir ./exp/ped1/pred/log/ped1_prediction_model.pth --m_items_dir ./exp/ped1/pred/log/ped1_prediction_keys.pt
-
-Start time: 29/06/2022 04:18:37
-Start Evaluation of: ped1, method: pred, trained model used: ped1
-Number of frames: 7200
-len of anomaly score: 7056
-The result of ped1
-AUC: 75.83966399516184 %
-Evaluate is taken:  2:02:43.131632
+AUC: 94.92513535241297 %
+Evaluate is taken:  0:01:08.334841
 ```
