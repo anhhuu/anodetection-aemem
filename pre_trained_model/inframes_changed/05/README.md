@@ -4,7 +4,6 @@
 
 ```bash
 python3 Train.py --method <method> --t_length 6 --dataset_type <dataset_type>
-
 ```
 
 ### Evaluate
