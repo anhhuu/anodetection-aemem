@@ -10,7 +10,7 @@ python3 Train.py --method <method> --t_length 4 --dataset_type <dataset_type>
 ### Evaluate
 
 ```
-python3 Evaluate.py --method <method> --dataset_type <dataset_type> --model_dir ./pre_trained_model/inframes_changed/01/<model>.pth --m_items_dir ./pre_trained_model/inframes_changed/01/<keys>.pt
+python3 Evaluate.py --method <method> --dataset_type <dataset_type> --model_dir ./pre_trained_model/inframes_changed/03/<model>.pth --m_items_dir ./pre_trained_model/inframes_changed/03/<keys>.pt
 ```
 
 ## Result
@@ -38,7 +38,7 @@ Training is finished
 Training is taken: 1:58:53.648046
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes_changed/01/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/01/ped2_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes_changed/03/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/03/ped2_prediction_keys.pt
 
 Start time: 29/06/2022 17:15:25
 Start Evaluation of: ped2, method: pred, trained model used: ped2
@@ -67,7 +67,7 @@ Training is finished
 Training is taken:  16:49:34.465922
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type avenue --t_length=4 --model_dir ./pre_trained_model/inframes_changed/01/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/01/avenue_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type avenue --t_length=4 --model_dir ./pre_trained_model/inframes_changed/03/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/03/avenue_prediction_keys.pt
 
 Start time: 30/06/2022 10:53:16
 Start Evaluation of: avenue, method: pred, trained model used: avenue
