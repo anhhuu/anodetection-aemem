@@ -34,13 +34,13 @@ Training is taken:  5:30:18.345175
 -----------------------------------------------------------------------------
 python3 Evaluate.py --method pred --dataset_type ped1 --t_length 6 --model_dir./pre_trained_model/inframes-and-msize_changed/04/ped1_prediction_model.pth --m_items_dir./pre_trained_model/inframes-and-msize_changed/04/ped1_prediction_keys.pt
 
-Start time: 03/07/2022 04:59:56
+Start time: 03/07/2022 16:14:19
 Start Evaluation of: ped1, method: pred, trained model used: ped1
 Number of frames: 7200
-len of anomaly score: 7020
+len of anomaly score: 7092
 The result of ped1
-AUC: 78.77219135283768 %
-Evaluate is taken:  0:39:54.412274
+AUC: 80.68558348102147 %
+Evaluate is taken:  0:04:21.960905
 ```
 
 ### PED2

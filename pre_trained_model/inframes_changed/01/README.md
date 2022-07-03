@@ -38,7 +38,6 @@ Training is finished
 Training is taken: 1:58:53.648046
 
 -----------------------------------------------------------------------------
-
 python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes_changed/01/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/01/ped2_prediction_keys.pt
 
 Start time: 29/06/2022 17:15:25
