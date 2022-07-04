@@ -25,7 +25,7 @@ DEFAULT_DATASET_NAME = "ped2"
 DEFAULT_METHOD = "pred"
 DEFAULT_FRAME_PRED_INPUT = 4
 DEFAULT_T_LENGTH = 5
-DEFAULT_DELAY = 5
+DEFAULT_DELAY = 1
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
     minus_h = window_H - frame_h
@@ -153,13 +153,15 @@ class App:
 
     def static_update(self):
         # Get a frame from the video source
+        #test_frame, predicted_frame, anomaly_score, pixel_label_frame, pixel_predicted_frame = self.vid.get_static_frame(self.iter_frame)
         test_frame, predicted_frame, anomaly_score, pixel_label_frame = self.vid.get_static_frame(self.iter_frame)
+        
         optimal_threshold = self.vid.opt_threshold
         # Calculate difference image
 
         # *** PIXEL LEVEL
         #test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img = self.ImgDiff.image_differences_pixel_label(
-            #test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold, pixel_label_frame)
+            #test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold, pixel_predicted_frame)
 
         # *** FRAME LEVEL
         test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img, SSIM_score = self.ImgDiff.image_differences(
@@ -182,7 +184,7 @@ class App:
             self.canvas.itemconfig(self.anomaly_tag, fill='white', text="Abnormal: NO")
 
         # Convert opencv narray images to PIL images
-        self.photo_test = ImageTk.PhotoImage(image=Image.fromarray(test_frame))
+        self.photo_test = ImageTk.PhotoImage(image=Image.fromarray(pixel_label_frame))
         self.photo_pred = ImageTk.PhotoImage(image=Image.fromarray(SSIM_diff_img))
         self.photo_diff = ImageTk.PhotoImage(image=Image.fromarray(thresholded_img))
         self.detected_regions = ImageTk.PhotoImage(image=Image.fromarray(test_img_detected))
@@ -196,6 +198,7 @@ class App:
         # Function callback
         self.window.after(DEFAULT_DELAY, self.static_update)
         if self.iter_frame == len(self.vid.vid[1]):
+        #if self.iter_frame == 179:
             self.iter_frame = 0
         else:
             self.iter_frame += 1
@@ -314,11 +317,15 @@ class VideoCapture:
             # load test and predicted frames
             test_frames, predicted_framese, test_num_video_index = self.get_dataset_frames()
             self.vid = [test_frames, predicted_framese, test_num_video_index]
-            # load frame
+
+            # FRAME-LEVEL data
             self.frame_scores = np.load(self.data_path[-1] + 'output/anomaly_score.npy')
             self.labels = np.load('./data/frame_labels_' + self.dataset_type + '.npy')
-            self.pixelLabels = self.load_pixelLabel_frames()
             self.opt_threshold = self.optimalThreshold(self.frame_scores, self.labels)
+
+            # PIXEL-LEVEL data
+            self.pixelLabels = self.load_pixelLabel_frames()
+            self.pixel_detected_frames = self.load_pixel_detected_frames()
 
     def get_frame(self):
         # if self.vid.isOpened():
@@ -338,10 +345,15 @@ class VideoCapture:
         # load the two input images
         i = iter_frame
 
-        if i == 352:
+        if i == 1495:
             print()
         test_frame_list = self.vid[0] 
 
+        if i == 1509:
+            print()
+
+        if i == 1631:
+            print()
         # Get predicted frame
         pred_frame_list = self.vid[1] 
         current_pred_frame = pred_frame_list[i]
@@ -353,6 +365,7 @@ class VideoCapture:
 
         # Get pixel-level label frame
         pixel_level_label = self.pixelLabels[true_index_of_test_frame]
+        #pixel_detected_frame = self.pixel_detected_frames[i]
 
         # resize image
         w1, h1, c1 = current_test_frame.shape
@@ -363,7 +376,7 @@ class VideoCapture:
             current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
 
         anomaly_score = self.frame_scores[i]
-        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label
+        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label#, pixel_detected_frame
 
     def get_dataset_frames(self):
         time_t = 0
@@ -443,6 +456,31 @@ class VideoCapture:
             label_list.append(label_img)
 
         return label_list
+
+    def load_pixel_detected_frames(self):
+        input_path = []
+        directory = []
+        dir_distinct = []
+        current_path = './dataset/' + self.dataset_type + '/output/detected_regions'
+        for path, _, files in os.walk(current_path):
+            for name in files:
+                if(path not in dir_distinct):
+                    dir_distinct.append(path)
+                input_path.append(os.path.join(path, name))
+                directory.append(path)
+        input_path.sort()
+        directory.sort()
+        dir_distinct.sort()
+
+        pixel_detected_frames = []
+        for i in range(len(input_path)):
+            detected_img = cv2.imread(input_path[i])
+            detected_img.astype("uint8")
+            detected_img = cv2.resize(detected_img, (256, 256))
+            detected_img = cv2.cvtColor(detected_img, cv2.COLOR_BGR2GRAY)
+            pixel_detected_frames.append(detected_img)
+
+        return pixel_detected_frames
 
     # Release the video source when the object is destroyed
     def __del__(self):

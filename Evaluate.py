@@ -249,7 +249,7 @@ for video in sorted(videos_list):
 
     feature_distance_list_of_video = feature_distance_list[video_name]
     # min-max normalization for compactness loss
-    anomaly_score_list_inv_of_video = anomaly_score_list_inv( feature_distance_list_of_video)
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv(feature_distance_list_of_video)
 
     # Sum score for anomaly rate
     score = score_sum(anomaly_score_list_of_video, anomaly_score_list_inv_of_video, args.alpha)
