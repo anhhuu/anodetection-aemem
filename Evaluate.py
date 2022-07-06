@@ -253,6 +253,9 @@ for k, (imgs) in enumerate(test_batch):
     feature_distance_list[videos_list[video_num].split(
         '/')[-1]].append(mse_feas)
 
+    if k % 1000 == 0:
+        print('DONE:', k, "frames")
+
 
 # Measuring the abnormality score and the AUC
 anomaly_score_total_list = []
