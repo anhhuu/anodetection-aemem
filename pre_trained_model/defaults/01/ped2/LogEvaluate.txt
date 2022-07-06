@@ -1,0 +1,7 @@
+Start time: 07/07/2022 01:23:21
+Start Evaluation of: ped2, method: pred, trained model used: ped2
+Number of frames: 2010
+len of anomaly score: 1962
+The result of ped2
+AUC: 93.97281784708683 %
+Evaluate is taken:  0:01:11.043955

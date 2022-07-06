@@ -1,0 +1,10 @@
+Start time: 05/07/2022 17:34:57
+Dataset:  avenue
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  12:37:02.935684
