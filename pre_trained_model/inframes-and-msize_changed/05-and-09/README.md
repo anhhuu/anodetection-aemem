@@ -74,5 +74,27 @@ Evaluate is taken:  0:16:23.659972
 ### AVENUE
 
 ```
-#TBU
+python3 Train.py --method pred --t_length 6 --msize 9 --dataset_type avenue
+
+Start time: 05/07/2022 05:22:26
+Dataset:  avenue
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  18:29:02.114667
+
+-----------------------------------------------------------------------------
+python3 Evaluate.py --method pred --dataset_type avenue --t_length 6 --model_dir ./pre_trained_model/inframes-and-msize_changed/05-and-09/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/05-and-09/avenue_prediction_keys.pt
+
+Start time: 07/07/2022 07:45:05
+Start Evaluation of: avenue, method: pred, trained model used: avenue
+Number of frames: 15324
+len of anomaly score: 15219
+The result of avenue
+AUC: 85.41317335587276 %
+Evaluate is taken:  1:41:01.854575
 ```
