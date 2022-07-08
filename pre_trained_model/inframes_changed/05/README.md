@@ -17,7 +17,7 @@ python3 Evaluate.py --method <method> --t_length 6 --dataset_type <dataset_type>
 ### PED1
 
 ```
-python3 Train.py --method pred --t_length 6 --dataset_type ped2
+python3 Train.py --method pred --t_length 6 --dataset_type ped1
 
 Start time: 08/07/2022 05:02:03
 Dataset:  ped1
@@ -31,7 +31,7 @@ Training is finished
 Training is taken:  5:17:38.196541
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --t_length 6 --dataset_type ped2 --model_dir ./pre_trained_model/inframes_changed/05/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/05/ped2_prediction_keys.pt
+python3 Evaluate.py --method pred --t_length 6 --dataset_type ped1 --model_dir ./pre_trained_model/inframes_changed/05/ped1_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/05/ped1_prediction_keys.pt
 
 Start time: 08/07/2022 14:06:33
 Start Evaluation of: ped1, method: pred, trained model used: ped1
