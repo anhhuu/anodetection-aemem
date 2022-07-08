@@ -17,7 +17,29 @@ python3 Evaluate.py --method <method> --t_length 6 --dataset_type <dataset_type>
 ### PED1
 
 ```
-#TBU
+python3 Train.py --method pred --t_length 6 --dataset_type ped2
+
+Start time: 08/07/2022 05:02:03
+Dataset:  ped1
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  5:17:38.196541
+
+-----------------------------------------------------------------------------
+python3 Evaluate.py --method pred --t_length 6 --dataset_type ped2 --model_dir ./pre_trained_model/inframes_changed/05/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes_changed/05/ped2_prediction_keys.pt
+
+Start time: 08/07/2022 14:06:33
+Start Evaluation of: ped1, method: pred, trained model used: ped1
+Number of frames: 7200
+len of anomaly score: 7020
+The result of ped1
+AUC: 82.89427865479291 %
+Evaluate is taken:  1:22:28.736049
 ```
 
 ### PED2
