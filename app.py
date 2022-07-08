@@ -296,7 +296,7 @@ class VideoCapture:
             self.frame_scores = np.load(
                 self.data_path[-1] + 'output/anomaly_score.npy')
             self.labels = np.load(
-                './data/frame_labels_' + self.dataset_type + '.npy')
+                './data_labels/frame_labels_' + self.dataset_type + '.npy')
             self.opt_threshold = self.optimalThreshold(
                 self.frame_scores, self.labels)
 

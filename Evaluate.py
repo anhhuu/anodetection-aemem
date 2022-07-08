@@ -91,7 +91,7 @@ model = torch.load(args.model_dir)
 model.cuda()
 m_items = torch.load(args.m_items_dir)
 # load labels file of dataset
-labels = np.load('./data/frame_labels_'+args.dataset_type+'.npy')
+labels = np.load('./data_labels/frame_labels_'+args.dataset_type+'.npy')
 
 # Setup a list contain video segments, element in the list contain all frames of this video segment.
 videos = OrderedDict()  # './dataset/ped2/testing/frames/01'; .../02; ...
