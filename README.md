@@ -1,6 +1,6 @@
 # anodetection-aemem
 
-![image](https://user-images.githubusercontent.com/19743019/175104995-0ecf8bf3-8069-4406-ac8d-42da3770fa25.png)
+![image](./demo_images/avenue_demo.png)
 
 Anomaly detection using autoencoder and memory module.
 
@@ -85,3 +85,17 @@ python3 app.py --method pred --dataset_type avenue
 ## Works Cited
 
 -   [[Learning Memory-guided Normality for Anomaly Detection]](https://openaccess.thecvf.com/content_CVPR_2020/papers/Park_Learning_Memory-Guided_Normality_for_Anomaly_Detection_CVPR_2020_paper.pdf) - [[Github]](https://github.com/cvlab-yonsei/MNAD/tree/master)
+
+## Demo Images
+
+### Avenue
+
+![image](./demo_images/avenue_demo.png)
+
+### Ped1
+
+![image](./demo_images/ped1_demo.png)
+
+### Ped2
+
+![image](./demo_images/ped2_demo.png)
