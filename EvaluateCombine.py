@@ -45,12 +45,12 @@ parser.add_argument('--pred_model_dir', type=str,
 parser.add_argument('--pred_m_items_dir', type=str,
                     default='./pre_trained_model/defaults/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--recon_model_dir', type=str,
-                    default='./pre_trained_model/papers/ped2_prediction_model.pth', help='directory of model')
+                    default='./pre_trained_model/papers/ped2_reconstruction_model.pth', help='directory of model')
 parser.add_argument('--recon_m_items_dir', type=str,
-                    default='./pre_trained_model/papers/ped2_prediction_keys.pt', help='directory of model')
+                    default='./pre_trained_model/papers/ped2_reconstruction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
-parser.add_argument('--is_save_output', type=str, default='true',
+parser.add_argument('--is_save_output', type=str, default='false',
                     help='is save predicted image')
 
 start_time = datetime.now()
@@ -321,8 +321,9 @@ for video in sorted(videos_list):
     score = score_sum(anomaly_score_list_of_video,
                       anomaly_score_list_inv_of_video, args.alpha)
 
-    # Append score to total list
-    anomaly_score_total_list += recon_score[:4]
+    # Append score to total list\
+    index_last_frame = args.t_length - 1
+    anomaly_score_total_list += recon_score[:index_last_frame]
     anomaly_score_total_list += score
 
 
