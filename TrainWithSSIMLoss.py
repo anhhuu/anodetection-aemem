@@ -18,15 +18,15 @@ parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')
-parser.add_argument('--epochs', type=int, default=60,
+parser.add_argument('--epochs', type=int, default=200,
                     help='number of epochs for training')
-parser.add_argument('--loss_compact', type=float, default=0.1,
+parser.add_argument('--loss_compact', type=float, default=0.125,
                     help='weight of the feature compactness loss')
-parser.add_argument('--loss_separate', type=float, default=0.1,
+parser.add_argument('--loss_separate', type=float, default=0.125,
                     help='weight of the feature separateness loss')
-parser.add_argument('--h', type=int, default=256,
+parser.add_argument('--h', type=int, default=128,
                     help='height of input images')
-parser.add_argument('--w', type=int, default=256, help='width of input images')
+parser.add_argument('--w', type=int, default=128, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
 parser.add_argument('--lr', type=float, default=2e-4,
                     help='initial learning rate')
@@ -167,6 +167,15 @@ for epoch in range(args.epochs):
     print('Memory_items:')
     print(m_items)
     print('----------------------------------------')
+    prefix_output_name = args.dataset_type
+    if args.method == 'pred':
+        prefix_output_name = prefix_output_name + \
+            '_prediction_epoch_' + str(epoch+1) + '_'
+    else:
+        prefix_output_name = prefix_output_name + \
+            '_reconstruction_epoch_' + str(epoch+1) + '_'
+    torch.save(model, os.path.join(log_dir, prefix_output_name + 'model.pth'))
+    torch.save(m_items, os.path.join(log_dir, prefix_output_name + 'keys.pt'))
 
 print('Training is finished')
 # Save the model and the memory items

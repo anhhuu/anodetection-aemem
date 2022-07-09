@@ -15,31 +15,15 @@ import glob
 import argparse
 import cv2
 from datetime import datetime
-
-from ignite.engine import *
-from ignite.handlers import *
-from ignite.metrics import *
-from ignite.utils import *
-from ignite.contrib.metrics.regression import *
-from ignite.contrib.metrics import *
 import torchgeometry as tgm
-
-
-def eval_step(engine, batch):
-    return batch
-
-
-default_evaluator = Engine(eval_step)
-metric = SSIM(data_range=1.0)
-metric.attach(default_evaluator, 'ssim')
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--test_batch_size', type=int,
                     default=1, help='batch size for test')
-parser.add_argument('--h', type=int, default=256,
+parser.add_argument('--h', type=int, default=128,
                     help='height of input images')
-parser.add_argument('--w', type=int, default=256, help='width of input images')
+parser.add_argument('--w', type=int, default=128, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
 parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
@@ -196,9 +180,6 @@ for k, (imgs) in enumerate(test_batch):
         outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = model.forward(
             imgs[:, 0:3*(args.t_length-1)], m_items_test, False)
 
-        state = default_evaluator.run(
-            [[[(outputs[0]+1)/2], [(imgs[0, 3*(args.t_length-1):]+1)/2]]])
-        # mse_imgs = torch.tensor([1-(1+state.metrics['ssim'])/2])
         pred_image = (outputs[0]+1)/2
         pred_image = torch.unsqueeze(pred_image, 0)
         ground_truth_image = (imgs[0, 3*(args.t_length-1):]+1)/2
