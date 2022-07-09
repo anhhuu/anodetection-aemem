@@ -12,7 +12,6 @@ from model.utils import DataLoader
 from utils import *
 from datetime import datetime
 import argparse
-import pytorch_ssim
 import torchgeometry as tgm
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
@@ -114,7 +113,7 @@ orig_stdout = sys.stdout
 f = open(os.path.join(log_dir, 'log.txt'), 'w')
 sys.stdout = f
 
-# loss_func_mse = nn.MSELoss(reduction='none')
+loss_func_mse = nn.MSELoss(reduction='none')
 loss_func_ssim = tgm.losses.SSIM(5, reduction='none')
 
 # Training
@@ -144,10 +143,11 @@ for epoch in range(args.epochs):
         optimizer.zero_grad()
         if args.method == 'pred':
             first_index = (args.t_length - 1) * 3
-            loss_pixel = torch.mean(1-loss_func_ssim(
-                outputs, imgs[:, first_index:]))
+            loss_SSIM = loss_func_ssim(outputs, imgs[:, first_index:])
+            loss_pixel = torch.mean(loss_SSIM)
         else:
-            loss_pixel = torch.mean(1-loss_func_ssim(outputs, imgs))
+            loss_SSIM = loss_func_ssim(outputs, imgs)
+            loss_pixel = torch.mean(loss_SSIM)
 
         loss = loss_pixel + args.loss_compact * compactness_loss + \
             args.loss_separate * separateness_loss
