@@ -28,7 +28,7 @@ parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--alpha', type=float, default=0.6,
                     help='weight for the anomality score')
-parser.add_argument('--recon_alpha', type=float, default=0.6,
+parser.add_argument('--recon_alpha', type=float, default=0.7,
                     help='weight for the anomality score')
 parser.add_argument('--th', type=float, default=0.01,
                     help='threshold for test updating')
@@ -117,7 +117,8 @@ for video in videos_list:
     videos[video_name]['length'] = len(videos[video_name]['frame'])
 
 # initialize label list, psnr dict and feature_distance_list (compactness loss) dict
-labels_list = []
+labels_list_full = []
+labels_list_pred = []
 label_length = 0
 psnr_list = {}
 recon_psnr_list = {}
@@ -140,10 +141,17 @@ print('Start Evaluation of:', args.dataset_type + ',',
 # setting for video anomaly detection
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
+    # pred without first (t_length - 1) frames
+    from_frame_pred = (args.t_length-1)+label_length
+    to_frame_pred = videos[video_name]['length']+label_length
+    frame_labels_pred = labels[0][from_frame_pred:to_frame_pred]
+    labels_list_pred = np.append(labels_list_pred, frame_labels_pred)
+
+    # pred with full frames
     from_frame = label_length
     to_frame = videos[video_name]['length']+label_length
-    frame_labels = labels[0][from_frame:to_frame]
-    labels_list = np.append(labels_list, frame_labels)
+    frame_labels_full = labels[0][from_frame:to_frame]
+    labels_list_full = np.append(labels_list_full, frame_labels_full)
 
     # update indices
     label_length += videos[video_name]['length']
@@ -179,19 +187,10 @@ for k, (imgs) in enumerate(test_batch):
 
     imgs = Variable(imgs).cuda()
 
-    if k % (args.t_length-1) == 0:
-        for i in range(args.t_length-1):
+    if k == pre_label_length:
+        for i in range(args.t_length):
             # do recon
             imgs_input = imgs[:, (3*i):(3*(i+1))]
-            # img_input_clone = torch.clone(imgs_input)
-            # img_input_clone = img_input_clone[0].permute(1, 2, 0)
-            # img_input_clone = img_input_clone.cpu().detach().numpy()
-
-            # img_input_clone = (img_input_clone + 1) * 127.5  # revert range
-            # img_input_clone = img_input_clone.astype(dtype=np.uint8)
-
-            # cv2.imshow('image', img_input_clone)
-            # cv2.waitKey(0)
 
             outputs, feas, updated_feas, recon_m_items, softmax_score_query, softmax_score_memory, compactness_loss = recon_model.forward(
                 imgs_input, recon_m_items, False)
@@ -216,7 +215,7 @@ for k, (imgs) in enumerate(test_batch):
             recon_feature_distance_list[videos_list[video_num].split(
                 '/')[-1]].append(mse_feas)
 
-            if args.is_save_output == 'true' and k == pre_label_length:
+            if args.is_save_output == 'true':
                 num_frame = len(test_batch)
                 num_digit_of_num_frame = len(str(num_frame))
 
@@ -239,6 +238,32 @@ for k, (imgs) in enumerate(test_batch):
                 index_image_output += 1
 
                 cv2.imwrite(img_name_dir, img_out_clone)
+    else:
+        # do recon
+        imgs_input = imgs[:, 3*(args.t_length-1):]
+
+        outputs, feas, updated_feas, recon_m_items, softmax_score_query, softmax_score_memory, compactness_loss = recon_model.forward(
+            imgs_input, recon_m_items, False)
+        mse_imgs = torch.mean(loss_func_mse(
+            (outputs[0]+1)/2, (imgs_input[0]+1)/2)).item()
+        mse_feas = compactness_loss.item()
+
+        # Calculating the threshold for updating at the test time
+        recon_point_sc = point_score(outputs, imgs_input)
+
+        if recon_point_sc < args.recon_th:
+            query = F.normalize(feas, dim=1)
+            query = query.permute(0, 2, 3, 1)  # b X h X w X d
+            recon_m_items = recon_model.memory.update(
+                query, recon_m_items, False)
+
+        # calculate psnr for each frame and then append it to psnr list
+        psnr_score = psnr(mse_imgs)
+        psnr_index = videos_list[video_num].split('/')[-1]
+        recon_psnr_list[psnr_index].append(psnr_score)
+        # append compactness lost of current frame to compactness list
+        recon_feature_distance_list[videos_list[video_num].split(
+            '/')[-1]].append(mse_feas)
 
     outputs, feas, updated_feas, pred_m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = pred_model.forward(
         imgs[:, 0:3*(args.t_length-1)], pred_m_items_test, False)
@@ -290,8 +315,10 @@ for k, (imgs) in enumerate(test_batch):
         print('DONE:', k, "frames")
 
 
-# Measuring the abnormality score and the AUC
-anomaly_score_total_list = []
+# Measuring the abnormality score and the AUC for task: recon, pred without (t_length - 1) first frames
+recon_anomaly_score_total_list_per_video = {}
+anomaly_score_total_list_recon = []
+anomaly_score_total_list_pred = []
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
 
@@ -321,27 +348,69 @@ for video in sorted(videos_list):
         feature_distance_list_of_video)
 
     # Sum score for anomaly rate
-    score = score_sum(anomaly_score_list_of_video,
-                      anomaly_score_list_inv_of_video, args.alpha)
+    pred_score = score_sum(anomaly_score_list_of_video,
+                           anomaly_score_list_inv_of_video, args.alpha)
 
-    # Append score to total list\
+    # Append score to total list
     index_last_frame = args.t_length - 1
-    anomaly_score_total_list += recon_score[:index_last_frame]
-    anomaly_score_total_list += score
+
+    anomaly_score_total_list_recon += recon_score
+    recon_anomaly_score_total_list_per_video[video_name] = recon_score
+
+    anomaly_score_total_list_pred += pred_score
+
+recon_accuracy = AUC(anomaly_score_total_list_recon,
+                     np.expand_dims(1-labels_list_full, 0))
+recon_opt_threshold = optimal_threshold(
+    anomaly_score_total_list_recon, labels_list_full)
+pred_opt_threshold = optimal_threshold(
+    anomaly_score_total_list_pred, labels_list_pred)
+
+pred_nomaly_average_score, pred_anomaly_average_score = average_score(
+    anomaly_score_total_list_pred, pred_opt_threshold)
+
+# Measuring the abnormality score and the AUC
+anomaly_score_total_list = []
+for video in sorted(videos_list):
+    video_name = video.split('/')[-1]
+    # Score for pred
+    psnr_list_of_video = psnr_list[video_name]
+    # min-max normalization for PSNR
+    anomaly_score_list_of_video = anomaly_score_list(psnr_list_of_video)
+
+    feature_distance_list_of_video = feature_distance_list[video_name]
+    # min-max normalization for compactness loss
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv(
+        feature_distance_list_of_video)
+
+    # Sum score for anomaly rate
+    pred_score = score_sum(anomaly_score_list_of_video,
+                           anomaly_score_list_inv_of_video, args.alpha)
+
+    # Append score to total list
+
+    for i in range(args.t_length - 1):
+        if recon_anomaly_score_total_list_per_video[video_name][i] < recon_opt_threshold:
+            anomaly_score_total_list += [pred_anomaly_average_score]
+        else:
+            anomaly_score_total_list += [pred_nomaly_average_score]
+
+    anomaly_score_total_list += pred_score
 
 
 anomaly_score_total_list = np.asarray(anomaly_score_total_list)
+
 print('Number of frames:', len(labels[0]))
 print('len of anomaly score:', len(anomaly_score_total_list))
 
-accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
+accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list_full, 0))
 
 log_dir = os.path.join('./exp', args.dataset_type, "recon+pred", args.exp_dir)
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 plot_ROC(anomaly_score_total_list, np.expand_dims(
-    1-labels_list, 0), accuracy, log_dir, args.dataset_type, "recon+pred", trained_model_using)
+    1-labels_list_full, 0), accuracy, log_dir, args.dataset_type, "recon+pred", trained_model_using)
 
 plot_anomaly_scores(anomaly_score_total_list,
                     labels[0], log_dir, args.dataset_type, "recon+pred", trained_model_using)
@@ -351,6 +420,11 @@ np.save(os.path.join(output_dir, 'recon_pred_anomaly_score.npy'),
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
+print('recon_AUC:', recon_accuracy)
+print('recon_opt_threshold:', recon_opt_threshold)
+print('pred_opt_threshold:', pred_opt_threshold)
+print('pred_nomaly_average_score:', pred_nomaly_average_score)
+print('pred_anomaly_average_score:', pred_anomaly_average_score)
 
 
 end_time = datetime.now()
