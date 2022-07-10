@@ -277,7 +277,7 @@ for video in sorted(videos_list):
                 anomaly_score_total_list_full += [nomaly_average_score]
             countTrue = countTrue + 1
         else:
-            if video_labels_list[video_name][i] == 1:
+            if video_labels_list[video_name][i] == 0:
                 anomaly_score_total_list_full += [anomaly_average_score]
             else:
                 anomaly_score_total_list_full += [nomaly_average_score]
