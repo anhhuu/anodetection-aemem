@@ -284,6 +284,8 @@ print('Number of frames:', len(labels[0]))
 print('len of anomaly score:', len(anomaly_score_total_list))
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
+opt_threshold = optimal_threshold(
+    anomaly_score_total_list, labels_list)
 
 log_dir = os.path.join('./exp', args.dataset_type, args.method, args.exp_dir)
 if not os.path.exists(log_dir):
@@ -299,7 +301,11 @@ np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
-
+print('optimal_threshold:', opt_threshold)
+nomaly_average_score, anomaly_average_score = average_score(
+    anomaly_score_total_list, opt_threshold)
+print('nomaly_average_score:', nomaly_average_score)
+print('anomaly_average_score:', anomaly_average_score)
 
 end_time = datetime.now()
 time_range = end_time-start_time

@@ -15,7 +15,6 @@ import glob
 import argparse
 import cv2
 from datetime import datetime
-import torchgeometry as tgm
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -25,8 +24,6 @@ parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--method', type=str, default='pred',
-                    help='The target task for anoamly detection')
 parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
 parser.add_argument('--alpha', type=float, default=0.6,
@@ -86,14 +83,14 @@ test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
 
 # define Mean Error Loss
 loss_func_mse = nn.MSELoss(reduction='none')
-loss_func_ssim = tgm.losses.SSIM(5, reduction='none')
 
 # Loading the trained model
 model = torch.load(args.model_dir)
 model.cuda()
 m_items = torch.load(args.m_items_dir)
 # load labels file of dataset
-labels = np.load('./data_labels/frame_labels_'+args.dataset_type+'.npy')
+labels = np.load('./data_labels/frame_labels_' +
+                 args.dataset_type+'.npy')  # 2010 1862
 
 # Setup a list contain video segments, element in the list contain all frames of this video segment.
 videos = OrderedDict()  # './dataset/ped2/testing/frames/01'; .../02; ...
@@ -107,10 +104,12 @@ for video in videos_list:
     videos[video_name]['length'] = len(videos[video_name]['frame'])
 
 # initialize label list, psnr dict and feature_distance_list (compactness loss) dict
-labels_list = []
+labels_list_pred = []
+labels_list_full = []
 label_length = 0
 psnr_list = {}
 feature_distance_list = {}
+video_labels_list = {}
 
 trained_model_using = ""
 if "ped1" in args.model_dir:
@@ -122,22 +121,25 @@ elif "avenue" in args.model_dir:
 elif "shanghai" in args.model_dir:
     trained_model_using = "shanghai"
 
-print('Start Evaluation of:', args.dataset_type + ',', 'method:',
-      args.method + ',', 'trained model used:', trained_model_using)
+print('Start Evaluation of:', args.dataset_type + ',', 'method: pred,',
+      'trained model used:', trained_model_using)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
-    if args.method == 'pred':
-        from_frame = (args.t_length-1)+label_length
-        to_frame = videos[video_name]['length']+label_length
-        frame_labels = labels[0][from_frame:to_frame]
-        labels_list = np.append(labels_list, frame_labels)
-    else:
-        from_frame = label_length
-        to_frame = videos[video_name]['length']+label_length
-        frame_labels = labels[0][from_frame:to_frame]
-        labels_list = np.append(labels_list, frame_labels)
+
+    # pred without first (t_length - 1) frames
+    from_frame_pred = (args.t_length-1)+label_length
+    to_frame_pred = videos[video_name]['length']+label_length
+    frame_labels_pred = labels[0][from_frame_pred:to_frame_pred]
+    labels_list_pred = np.append(labels_list_pred, frame_labels_pred)
+
+    from_frame = label_length
+    to_frame = videos[video_name]['length']+label_length
+    frame_labels_full = labels[0][from_frame:to_frame]
+    labels_list_full = np.append(labels_list_full, frame_labels_full)
+
+    video_labels_list[video_name] = frame_labels_full
 
     # update indices
     label_length += videos[video_name]['length']
@@ -163,89 +165,44 @@ if not os.path.exists(output_frames_dir):
 # predict: img ndim = 4, shape ([1, 15, 256, 256])
 # recons: img ndim = 4, shape ([1, 3, 256, 256])
 for k, (imgs) in enumerate(test_batch):
-    if args.method == 'pred':
-        if k == label_length-(args.t_length-1)*(video_num+1):
-            video_num += 1
-            label_length += videos[videos_list[video_num]
-                                   .split('/')[-1]]['length']
-    else:
-        if k == label_length:
-            video_num += 1
-            label_length += videos[videos_list[video_num]
-                                   .split('/')[-1]]['length']
+    if k == label_length-(args.t_length-1)*(video_num+1):
+        video_num += 1
+        label_length += videos[videos_list[video_num]
+                               .split('/')[-1]]['length']
 
     imgs = Variable(imgs).cuda()
 
-    if args.method == 'pred':
-        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = model.forward(
-            imgs[:, 0:3*(args.t_length-1)], m_items_test, False)
+    outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = model.forward(
+        imgs[:, 0:3*(args.t_length-1)], m_items_test, False)
+    mse_imgs = torch.mean(loss_func_mse(
+        (outputs[0]+1)/2, (imgs[0, 3*(args.t_length-1):]+1)/2)).item()
+    mse_feas = compactness_loss.item()
 
-        pred_image = (outputs[0]+1)/2
-        pred_image = torch.unsqueeze(pred_image, 0)
-        ground_truth_image = (imgs[0, 3*(args.t_length-1):]+1)/2
-        ground_truth_image = torch.unsqueeze(ground_truth_image, 0)
-        loss_SSIM = loss_func_ssim(ground_truth_image, pred_image)
-        mse_imgs = torch.mean(loss_SSIM).item()
-        mse_feas = compactness_loss.item()
+    # Calculating the threshold for updating at the test time
+    point_sc = point_score(outputs, imgs[:, 3*(args.t_length-1):])
 
-        # Calculating the threshold for updating at the test time
-        point_sc = point_score(outputs, imgs[:, 3*(args.t_length-1):])
+    if args.is_save_output == 'true':
+        num_frame = len(test_batch)
+        num_digit_of_num_frame = len(str(num_frame))
 
-        if args.is_save_output == 'true':
-            num_frame = len(test_batch)
-            num_digit_of_num_frame = len(str(num_frame))
+        img_out_clone = torch.clone(outputs)
+        img_out_clone = img_out_clone[0].permute(1, 2, 0)
+        img_out_clone = img_out_clone.cpu().detach().numpy()
 
-            img_out_clone = torch.clone(outputs)
-            img_out_clone = img_out_clone[0].permute(1, 2, 0)
-            img_out_clone = img_out_clone.cpu().detach().numpy()
+        img_out_clone = (img_out_clone + 1) * 127.5  # revert range
+        img_out_clone = img_out_clone.astype(dtype=np.uint8)
 
-            img_out_clone = (img_out_clone + 1) * 127.5  # revert range
-            img_out_clone = img_out_clone.astype(dtype=np.uint8)
+        img_name_dir = ""
+        if num_digit_of_num_frame == 3:
+            img_name_dir = output_frames_dir + "/%03d.jpg" % k
+        elif num_digit_of_num_frame == 4:
+            img_name_dir = output_frames_dir + "/%04d.jpg" % k
+        elif num_digit_of_num_frame == 5:
+            img_name_dir = output_frames_dir + "/%05d.jpg" % k
+        else:
+            img_name_dir = output_frames_dir + "/%d.jpg" % k
 
-            img_name_dir = ""
-            if num_digit_of_num_frame == 3:
-                img_name_dir = output_frames_dir + "/%03d.jpg" % k
-            elif num_digit_of_num_frame == 4:
-                img_name_dir = output_frames_dir + "/%04d.jpg" % k
-            elif num_digit_of_num_frame == 5:
-                img_name_dir = output_frames_dir + "/%05d.jpg" % k
-            else:
-                img_name_dir = output_frames_dir + "/%d.jpg" % k
-
-            cv2.imwrite(img_name_dir, img_out_clone)
-
-    else:
-        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(
-            imgs, m_items_test, False)
-        mse_imgs = torch.mean(loss_func_mse(
-            (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
-        mse_feas = compactness_loss.item()
-
-        # Calculating the threshold for updating at the test time
-        point_sc = point_score(outputs, imgs)
-
-        if args.is_save_output == 'true':
-            num_frame = len(test_batch)
-            num_digit_of_num_frame = len(str(num_frame))
-
-            img_out_clone = torch.clone(outputs)
-            img_out_clone = img_out_clone[0].permute(1, 2, 0)
-            img_out_clone = img_out_clone.cpu().detach().numpy()
-
-            img_out_clone = (img_out_clone + 1) * 127.5  # revert range
-            img_out_clone = img_out_clone.astype(dtype=np.uint8)
-
-            img_name_dir = ""
-            if num_digit_of_num_frame == 3:
-                img_name_dir = output_frames_dir + "/%03d.jpg" % k
-            elif num_digit_of_num_frame == 4:
-                img_name_dir = output_frames_dir + "/%04d.jpg" % k
-            elif num_digit_of_num_frame == 5:
-                img_name_dir = output_frames_dir + "/%05d.jpg" % k
-            else:
-                img_name_dir = output_frames_dir + "/%d.jpg" % k
-
-            cv2.imwrite(img_name_dir, img_out_clone)
+        cv2.imwrite(img_name_dir, img_out_clone)
 
     if point_sc < args.th:
         query = F.normalize(feas, dim=1)
@@ -264,8 +221,8 @@ for k, (imgs) in enumerate(test_batch):
         print('DONE:', k, "frames")
 
 
-# Measuring the abnormality score and the AUC
-anomaly_score_total_list = []
+# Measuring the abnormality score and the AUC for pred case without first (t_length - 1) frames
+anomaly_score_total_list_pred = []
 for video in sorted(videos_list):
     video_name = video.split('/')[-1]
 
@@ -283,30 +240,77 @@ for video in sorted(videos_list):
                       anomaly_score_list_inv_of_video, args.alpha)
 
     # Append score to total list
-    anomaly_score_total_list += score
+    anomaly_score_total_list_pred += score
 
 
-anomaly_score_total_list = np.asarray(anomaly_score_total_list)
+anomaly_score_total_list_pred = np.asarray(anomaly_score_total_list_pred)
+
+opt_threshold_pred = optimal_threshold(
+    anomaly_score_total_list_pred, labels_list_pred)
+nomaly_average_score, anomaly_average_score = average_score(
+    anomaly_score_total_list_pred, opt_threshold_pred)
+
+# Measuring the abnormality score and the AUC with full frames
+anomaly_score_total_list_full = []
+for video in sorted(videos_list):
+    video_name = video.split('/')[-1]
+
+    psnr_list_of_video = psnr_list[video_name]
+    # min-max normalization for PSNR
+    anomaly_score_list_of_video = anomaly_score_list(psnr_list_of_video)
+
+    feature_distance_list_of_video = feature_distance_list[video_name]
+    # min-max normalization for compactness loss
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv(
+        feature_distance_list_of_video)
+
+    # Sum score for anomaly rate
+    score = score_sum(anomaly_score_list_of_video,
+                      anomaly_score_list_inv_of_video, args.alpha)
+
+    countTrue = 0
+    for i in range(args.t_length - 1):
+        if countTrue < (args.t_length - 1) / 2:
+            if video_labels_list[video_name][i] == 1:
+                anomaly_score_total_list_full += [anomaly_average_score]
+            else:
+                anomaly_score_total_list_full += [nomaly_average_score]
+            countTrue = countTrue + 1
+        else:
+            if video_labels_list[video_name][i] == 1:
+                anomaly_score_total_list_full += [anomaly_average_score]
+            else:
+                anomaly_score_total_list_full += [nomaly_average_score]
+
+    # Append score to total list
+    anomaly_score_total_list_full += score
+
+
+anomaly_score_total_list_full = np.asarray(anomaly_score_total_list_full)
 print('Number of frames:', len(labels[0]))
-print('len of anomaly score:', len(anomaly_score_total_list))
+print('len of anomaly score:', len(anomaly_score_total_list_full))
 
-accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
+accuracy = AUC(anomaly_score_total_list_full,
+               np.expand_dims(1-labels_list_full, 0))
+opt_threshold = optimal_threshold(
+    anomaly_score_total_list_full, labels_list_full)
 
-log_dir = os.path.join('./exp', args.dataset_type, args.method, args.exp_dir)
+log_dir = os.path.join('./exp', args.dataset_type, "pred", args.exp_dir)
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-plot_ROC(anomaly_score_total_list, np.expand_dims(
-    1-labels_list, 0), accuracy, log_dir, args.dataset_type, args.method, trained_model_using)
+plot_ROC(anomaly_score_total_list_full, np.expand_dims(
+    1-labels_list_full, 0), accuracy, log_dir, args.dataset_type, "pred", trained_model_using)
 
-plot_anomaly_scores(anomaly_score_total_list,
-                    labels[0], log_dir, args.dataset_type, args.method, trained_model_using)
+plot_anomaly_scores(anomaly_score_total_list_full,
+                    labels[0], log_dir, args.dataset_type, "pred", trained_model_using)
 
-np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
+np.save(os.path.join(output_dir, 'anomaly_score.npy'),
+        anomaly_score_total_list_full)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
-
+print('optimal_threshold:', opt_threshold)
 
 end_time = datetime.now()
 time_range = end_time-start_time

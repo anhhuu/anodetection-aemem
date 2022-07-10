@@ -18,15 +18,15 @@ parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')
-parser.add_argument('--epochs', type=int, default=200,
+parser.add_argument('--epochs', type=int, default=60,
                     help='number of epochs for training')
-parser.add_argument('--loss_compact', type=float, default=0.125,
+parser.add_argument('--loss_compact', type=float, default=0.1,
                     help='weight of the feature compactness loss')
-parser.add_argument('--loss_separate', type=float, default=0.125,
+parser.add_argument('--loss_separate', type=float, default=0.1,
                     help='weight of the feature separateness loss')
-parser.add_argument('--h', type=int, default=128,
+parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
-parser.add_argument('--w', type=int, default=128, help='width of input images')
+parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
 parser.add_argument('--lr', type=float, default=2e-4,
                     help='initial learning rate')
@@ -114,7 +114,7 @@ f = open(os.path.join(log_dir, 'log.txt'), 'w')
 sys.stdout = f
 
 loss_func_mse = nn.MSELoss(reduction='none')
-loss_func_ssim = tgm.losses.SSIM(5, reduction='none')
+loss_func_ssim = tgm.losses.SSIM(7, reduction='none')
 
 # Training
 print('Start training...')

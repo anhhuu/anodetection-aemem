@@ -136,3 +136,30 @@ def score_sum(list1, list2, alpha):
         list_result.append(sum_score)
 
     return list_result
+
+
+def optimal_threshold(anomal_scores, labels):
+    y_true = 1 - labels
+    y_score = np.squeeze(anomal_scores)
+    fpr, tpr, threshold = metrics.roc_curve(y_true, y_score)
+    frame_auc = metrics.roc_auc_score(y_true, y_score)
+    # calculate the g-mean for each threshold
+    gmeans = np.sqrt(tpr * (1-fpr))
+    # locate the index of the largest g-mean
+    ix = np.argmax(gmeans)
+    return threshold[ix]
+
+
+def average_score(anomaly_score, opt_threshold):
+    count_nomaly = 0
+    sum_nomaly = 0
+    count_anomaly = 0
+    sum_anomaly = 0
+    for i in range(len(anomaly_score)):
+        if anomaly_score[i] < opt_threshold:
+            sum_anomaly += anomaly_score[i]
+            count_anomaly += 1
+        else:
+            sum_nomaly += anomaly_score[i]
+            count_nomaly += 1
+    return sum_nomaly/count_nomaly, sum_anomaly/count_anomaly
