@@ -45,9 +45,9 @@ parser.add_argument('--pred_model_dir', type=str,
 parser.add_argument('--pred_m_items_dir', type=str,
                     default='./pre_trained_model/defaults/ped2_prediction_keys.pt', help='directory of model')
 parser.add_argument('--recon_model_dir', type=str,
-                    default='./pre_trained_model/papers/ped2_reconstruction_model.pth', help='directory of model')
+                    default='./pre_trained_model/recon/ped2_reconstruction_model.pth', help='directory of model')
 parser.add_argument('--recon_m_items_dir', type=str,
-                    default='./pre_trained_model/papers/ped2_reconstruction_keys.pt', help='directory of model')
+                    default='./pre_trained_model/recon/ped2_reconstruction_keys.pt', help='directory of model')
 parser.add_argument('--exp_dir', type=str, default='log',
                     help='directory of log')
 parser.add_argument('--is_save_output', type=str, default='false',
