@@ -1,11 +1,11 @@
-| Model name                 | Ped1 (%AUC)                 | Ped2 (%AUC)                    | Avenue (%AUC)                   |
-| -------------------------- | --------------------------- | ------------------------------ | ------------------------------- |
-| papers                     | x                           | <i> 96.97                      | <i>88.52                        |
-| re-trained default         | <i>80.70                    | <i> 93.97                      | <i>82.96                        |
-| papers + rand              | x                           | 95.37                          |                                 |
-| re-trained default + rand  | 80.05                       | 92.33                          |                                 |
-| re-trained default + recon | <b>80.36                    | <b>93.49                       |                                 |
-| highest + recon            | (model `inframes = 5`):\_\_ | (model `msize = 9`): <b> 95.96 | `inframes = 5; msize = 9`: \_\_ |
+| Model name                 | Ped1 (%AUC)                      | Ped2 (%AUC)                    | Avenue (%AUC)                   |
+| -------------------------- | -------------------------------- | ------------------------------ | ------------------------------- |
+| papers                     | x                                | <i> 96.97                      | <i>88.52                        |
+| re-trained default         | <i>80.70                         | <i> 93.97                      | <i>82.96                        |
+| papers + rand              | x                                | 95.37                          |                                 |
+| re-trained default + rand  | 80.05                            | 92.33                          |                                 |
+| re-trained default + recon | <b>80.36                         | <b>93.49                       |                                 |
+| highest + recon            | <b>(model `inframes = 5`): 82.45 | (model `msize = 9`): <b> 95.96 | `inframes = 5; msize = 9`: \_\_ |
 
 ## 1. papers + rand
 
