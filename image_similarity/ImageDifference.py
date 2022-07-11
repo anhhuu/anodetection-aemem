@@ -71,12 +71,79 @@ class ImageDifference():
                 cv2.rectangle(test_clone, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 cv2.rectangle(pred_clone, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-            return test_clone, pred_clone, complete_process_img, thesholded_img, SSIM_score
+            return test_clone, pred_clone, complete_process_img, diff, SSIM_score
         else:
             theshold_blank_image = np.zeros((256, 256, 3), np.uint8)
             diff_blank_img = np.zeros((256, 256, 3), np.uint8)
             diff_blank_img += 255
             return test_clone, pred_clone, theshold_blank_image, diff_blank_img, SSIM_score
+
+    def image_differences_pixelLevel(self, test_image, predicted_image, pred_score, threshold):
+        print("score: ", pred_score)
+        test_clone = test_image.copy()
+        pred_clone = predicted_image.copy()
+
+        # convert RGB images to grayscale images
+        grayA = cv2.cvtColor(test_clone, cv2.COLOR_BGR2GRAY)
+        grayB = cv2.cvtColor(pred_clone, cv2.COLOR_BGR2GRAY)        
+        # compute the Structural Similarity Index (SSIM) between the two
+        # images, ensuring that the difference image is returned
+        (SSIM_score, diff) = structural_similarity(grayA, grayB, full=True)
+        diff = (diff * 255).astype("uint8")
+        diff = cv2.GaussianBlur(diff, (5, 5), sigmaX=3, sigmaY=3)
+        #cv2.imshow("diff image", cv2.resize(diff, None, fx=1, fy=1))
+        print("SSIM: {}".format(SSIM_score))
+
+        if pred_score < threshold:  # check if frame has score lower than threshold
+            # Threshold the difference image, followed by finding contours to
+            # obtain the regions of the two input images that differ
+            # both of these settings (BINARY_INV and OTSU) are applied at the same time using the vertical bar
+        
+            # Firstly, we need to separate foreground and background
+            foreground_extracted = cv2.threshold(diff, 0, 255, cv2.THRESH_OTSU)[1]
+            # Then, inverse change pixel intensity for visualizing
+            inverse_foreground = cv2.threshold(foreground_extracted, 0, 255, cv2.THRESH_BINARY_INV)
+            # Finally, get the thresholded image
+            thesholded_img = inverse_foreground[1]
+
+            # Post-Process data
+            #kernel_2 = np.ones((2, 2), np.uint8)
+            #kernel_3 = np.ones((3, 3), np.uint8)
+            #kernel_4 = np.ones((4, 4), np.uint8)
+            kernel_5 = np.ones((5, 5), np.uint8)
+            kernel_7 = np.ones((7, 7), np.uint8)
+            kernel_11 = np.ones((11, 11), np.uint8)
+            #Closing_img = cv2.morphologyEx(thesholded_img, cv2.MORPH_CLOSE, kernel=kernel_4, iterations=1)  # dilate -> erode 
+            Opening_img = cv2.morphologyEx(thesholded_img, cv2.MORPH_OPEN, kernel=kernel_7, iterations=1)  # erode -> dilate
+            #Eroded_img = cv2.erode(Opening_img, kernel=kernel_7, iterations=1)
+
+            #complete_process_img = cv2.erode(Closing_img, kernel=kernel_2, iterations=1)
+            complete_process_img = Opening_img
+            # Next step, we find the contours of thresholded image
+            cnts = cv2.findContours(complete_process_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = imutils.grab_contours(cnts)
+
+            # loop over the contours in order to show bbox as well as eliminate small regions 
+            for c in cnts:
+                # compute the bounding box of the contour and then draw the
+                # bounding box on both input images to represent where the two
+                # images differ
+                (x, y, w, h) = cv2.boundingRect(c)
+
+                # Remove regions in-significant regions
+                if w < 17 or h < 17:
+                    continue
+
+                #cv2.circle(test_clone, center=, radius=1, color=(255, 0, 0), thickness=2)
+                cv2.rectangle(pred_clone, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+            return test_clone, pred_clone, complete_process_img, diff, SSIM_score
+        else:
+            theshold_blank_image = np.zeros((256, 256, 3), np.uint8)
+            diff_blank_img = np.zeros((256, 256, 3), np.uint8)
+            diff_blank_img += 255
+            return test_clone, pred_clone, theshold_blank_image, diff_blank_img, SSIM_score
+
 
     def image_differences_subtract(self, imageA, imageB):
         imgA_clone = imageA.copy()

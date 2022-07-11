@@ -25,7 +25,7 @@ DEFAULT_DATASET_NAME = "ped2"
 DEFAULT_METHOD = "pred"
 DEFAULT_FRAME_PRED_INPUT = 4
 DEFAULT_T_LENGTH = 5
-DEFAULT_DELAY = 1
+DEFAULT_DELAY = 50
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
     minus_h = window_H - frame_h
@@ -153,15 +153,15 @@ class App:
 
     def static_update(self):
         # Get a frame from the video source
-        #test_frame, predicted_frame, anomaly_score, pixel_label_frame, pixel_predicted_frame = self.vid.get_static_frame(self.iter_frame)
-        test_frame, predicted_frame, anomaly_score, pixel_label_frame = self.vid.get_static_frame(self.iter_frame)
+        test_frame, predicted_frame, anomaly_score, pixel_label_frame, pixel_predicted_frame = self.vid.get_static_frame(self.iter_frame)
+        #test_frame, predicted_frame, anomaly_score, pixel_label_frame = self.vid.get_static_frame(self.iter_frame)
         
         optimal_threshold = self.vid.opt_threshold
         # Calculate difference image
 
         # *** PIXEL LEVEL
         #test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img = self.ImgDiff.image_differences_pixel_label(
-            #test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold, pixel_predicted_frame)
+            #test_frame, predicted_frame, anomaly_score, self.vid.opt_threshold, pixel_label_frame)
 
         # *** FRAME LEVEL
         test_img_detected, pred_img_detected, thresholded_img, SSIM_diff_img, SSIM_score = self.ImgDiff.image_differences(
@@ -184,8 +184,8 @@ class App:
             self.canvas.itemconfig(self.anomaly_tag, fill='white', text="Abnormal: NO")
 
         # Convert opencv narray images to PIL images
-        self.photo_test = ImageTk.PhotoImage(image=Image.fromarray(pixel_label_frame))
-        self.photo_pred = ImageTk.PhotoImage(image=Image.fromarray(SSIM_diff_img))
+        self.photo_test = ImageTk.PhotoImage(image=Image.fromarray(test_frame))
+        self.photo_pred = ImageTk.PhotoImage(image=Image.fromarray(pixel_label_frame))
         self.photo_diff = ImageTk.PhotoImage(image=Image.fromarray(thresholded_img))
         self.detected_regions = ImageTk.PhotoImage(image=Image.fromarray(test_img_detected))
 
@@ -195,6 +195,9 @@ class App:
         self.canvas.create_image(self.frame_3_x_axis, self.bias_h, image=self.photo_diff, anchor=tk.NW)
         self.canvas.create_image(self.frame_4_x_axis, self.bias_h, image=self.detected_regions, anchor=tk.NW)
 
+        # exc = [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+        # if self.iter_frame in exc:
+        #     print()
         # Function callback
         self.window.after(DEFAULT_DELAY, self.static_update)
         if self.iter_frame == len(self.vid.vid[1]):
@@ -365,7 +368,7 @@ class VideoCapture:
 
         # Get pixel-level label frame
         pixel_level_label = self.pixelLabels[true_index_of_test_frame]
-        #pixel_detected_frame = self.pixel_detected_frames[i]
+        pixel_detected_frame = self.pixel_detected_frames[i]
 
         # resize image
         w1, h1, c1 = current_test_frame.shape
@@ -376,7 +379,7 @@ class VideoCapture:
             current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
 
         anomaly_score = self.frame_scores[i]
-        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label#, pixel_detected_frame
+        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label, pixel_detected_frame
 
     def get_dataset_frames(self):
         time_t = 0

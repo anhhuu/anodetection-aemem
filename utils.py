@@ -74,16 +74,16 @@ def anomaly_score_list_inv(psnr_list):
 
 def AUC(anomal_scores, labels):
     # calculate AUC
-    frame_auc = roc_auc_score(y_true=np.squeeze(
-        labels, axis=0), y_score=np.squeeze(anomal_scores))
+    frame_auc = roc_auc_score(y_true=np.squeeze(labels, axis=0), 
+                              y_score=np.squeeze(anomal_scores))
 
     return frame_auc
 
 
 def plot_ROC(anomal_scores, labels, auc, log_dir, dataset_type, method, trained_model_using):
     # plot ROC curve
-    fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(
-        labels, axis=0), y_score=np.squeeze(anomal_scores))
+    fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(labels, axis=0), 
+                                    y_score=np.squeeze(anomal_scores))
 
     # create ROC curve
     plt.title('Receiver Operating Characteristic \nmethod: ' +

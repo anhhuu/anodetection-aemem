@@ -9,6 +9,7 @@ from image_similarity import ImageDifference as id
 import numpy as np
 from sklearn import metrics
 import imutils
+from utils import *
 
 # imageA = cv2.imread('./dataset/ped2/testing/frames/01/104.jpg')
 # imageA = cv2.resize(imageA, (256, 256))
@@ -70,6 +71,9 @@ class VideoCapture:
         pixel_detected_frame = self.pixel_detected_frames[i]
         pixel_level_label = self.pixelLabels[true_index_of_test_frame]
 
+        # Get label score
+        label_score = self.labels[0, true_index_of_test_frame]
+
         # resize image
         w1, h1, c1 = current_test_frame.shape
         w2, h2, c2 = current_pred_frame.shape
@@ -79,7 +83,7 @@ class VideoCapture:
             current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
 
         anomaly_score = self.frame_scores[i]
-        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label, pixel_detected_frame
+        return current_test_frame, current_pred_frame, anomaly_score, pixel_level_label, pixel_detected_frame, label_score
 
     def get_dataset_frames(self):
         time_t = 0
@@ -204,6 +208,26 @@ class VideoCapture:
         # return the intersection over union value
         return iou
 
+    def get_boundingbox(self, binary_image):
+        detected_bbox = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        detected_bbox = imutils.grab_contours(detected_bbox)
+        return detected_bbox
+
+    def show_bbox(self, detected_bbox):
+        show_image = np.zeros((256, 256), np.uint8)
+        for c in detected_bbox:
+            (x1, y1, w1, h1) = cv2.boundingRect(c)
+            # Remove regions in-significant regions
+            if w1 > 17 or h1 > 17: 
+                cv2.rectangle(regions_detected, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 0), 1)
+                for ii in range(w1):
+                    real_x = x1 + ii
+                    for j in range(h1):     
+                        real_y = y1 + j
+                        show_image[(real_y, real_x)] = 255
+
+        return show_image
+
 def create_detected_pixelLevel_frame(test, predicted, anomaly_score, optimal_threshold):
     ID = id.ImageDifference()
     # *** PIXEL LEVEL
@@ -255,60 +279,60 @@ if save_pixelLevel_detected_frames == True:
 
 IoU_score_list = []
 if measure_pixelLevel_AUC == True:
+    labels_list = []
     for i in range(len(DATA.vid[1])):
-        _, _, anomaly_score, pixel_level_label, pixel_detected_frame = DATA.get_static_frame(i)
-
-        if anomaly_score > optimal_threshold:
+        test_frame, predicted_frame, anomaly_score, pixel_level_label, pixel_detected_frame, label_score = DATA.get_static_frame(i)
+        labels_list.append(label_score)
+        if anomaly_score > (optimal_threshold):
+            IoU_score_list.append(0)
             continue
         else:
-            if i == 70:
-                label_bbox = cv2.findContours(pixel_level_label, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                label_bbox = imutils.grab_contours(label_bbox)
+            label_bbox_raw = DATA.get_boundingbox(pixel_level_label)
+            detected_bbox_raw = DATA.get_boundingbox(pixel_detected_frame)
+            # loop over the contours in order to show bbox as well as eliminate small regions 
 
-                detected_bbox = cv2.findContours(pixel_detected_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                detected_bbox = imutils.grab_contours(detected_bbox)
-                # loop over the contours in order to show bbox as well as eliminate small regions 
+            #cv2.imshow("detected_frame", pixel_detected_frame)
+            regions_detected = pixel_detected_frame.copy()
+    
+            detected_bbox = DATA.show_bbox(detected_bbox_raw)
+            label_bbox =  DATA.show_bbox(label_bbox_raw)
 
-                #cv2.imshow("detected_frame", pixel_detected_frame)
-                remove_regions = pixel_detected_frame.copy()
-                regions_detected = pixel_detected_frame.copy()
-                demo = pixel_detected_frame.copy()
-                demo2 = pixel_detected_frame.copy()
-                # x1 = 0
-                # y1 = 0
-                # for ii in range(128):
-                #     real_x = x1 + ii
-                #     if real_x > 255:
-                #         continue
-                #     for j in range(255):     
-                #         real_y = y1 + j
-                #         if real_y > 255:
-                #             continue
-                #         demo[(real_x, real_y)] = 255
-                #         demo2[(real_y, real_x)] = 255
-                # cv2.imshow("demoxy", demo)
-                # cv2.imshow("demoyx", demo2)
-                # cv2.waitKey(0)
+            # cv2.waitKey(0)
+            Intersection_Area = np.logical_and(label_bbox, detected_bbox)
+            Union_Area = np.logical_or(label_bbox, detected_bbox)
+            Inter_sum = np.sum(Intersection_Area)
+            Uni_sum = np.sum(Union_Area)
+            IoU_score = 0
+            if Uni_sum == 0:
+               IoU_score = 0
+            else:
+               IoU_score =  Inter_sum / Uni_sum
+            IoU_score_list.append(IoU_score)
 
-                template_img = np.zeros((256, 256), np.uint8)
-                for c in detected_bbox:
-                    (x1, y1, w1, h1) = cv2.boundingRect(c)
-                    # Remove regions in-significant regions
-                    if w1 > 17 or h1 > 17: 
-                        cv2.rectangle(regions_detected, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 0), 1)
-                        for ii in range(h1):
-                            real_x = x1 + ii
-                            for j in range(w1):     
-                                real_y = y1 + j
-                                template_img[(real_x, real_y)] = 255
+            # if i == 59 or i == 61 or i == 70:
+            #    cv2.imshow("detect_bbox", detected_bbox)
+            #    cv2.imshow("detected", pixel_detected_frame)
+            #    cv2.imshow("regions_detected", regions_detected)
+            #    cv2.imshow("label", pixel_level_label)
+            #    cv2.imshow("label_bbox", label_bbox)
+            #    print("IoU: ", IoU_score)
+            #    cv2.waitKey(0)
+            #print("IOU = ", IoU_score)
+            #cv2.waitKey(0)
 
-                        
-                cv2.imshow("template_img", template_img)
-                cv2.imshow("pixel_detected_frame", pixel_detected_frame)
-                cv2.imshow("regions_detected_frame", regions_detected)
-                cv2.waitKey(0)
 
-                Intersection_Area = np.logical_and(pixel_level_label, pixel_detected_frame)
-                Union_Area = np.logical_or(pixel_level_label, pixel_detected_frame)
-                IoU_score = Intersection_Area / Union_Area
-                IoU_score_list[i]
+    #label_array = DATA.labels[0, :1962]
+    label_array = np.array(labels_list)
+    count_tp = 0
+    count_tn = 0
+    for i in range(1962):
+        if IoU_score_list[i] >= 0.4 and labels_list[i] == 1:
+            count_tp += 1
+        elif IoU_score_list[i] <          0.4 and labels_list[i] == 0:
+            count_tn += 1
+    
+    accuracy = (count_tp + count_tn)/1962
+    print('accuracy:', accuracy*100, '%')
+    #AUC = AUC(IoU_score_list, np.expand_dims(1-label_array, 0))
+    #print('AUC:', AUC*100, '%')
+    
