@@ -192,7 +192,6 @@ def optimal_threshold(anomal_scores, labels):
     gmeans = np.sqrt(tpr * (1-fpr))
     # locate the index of the largest g-mean
     ix = np.argmax(gmeans)
-    print('Best Threshold=%f, G-Mean=%.3f' % (threshold[ix], gmeans[ix]))
     return threshold[ix]
 
 
