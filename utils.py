@@ -8,7 +8,7 @@ import copy
 from sklearn.metrics import roc_auc_score
 from sklearn import metrics
 from matplotlib import colors
-
+import cv2
 
 def rmse(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
@@ -72,16 +72,16 @@ def anomaly_score_list_inv(psnr_list):
 
 def AUC(anomal_scores, labels):
     # calculate AUC
-    frame_auc = roc_auc_score(y_true=np.squeeze(
-        labels, axis=0), y_score=np.squeeze(anomal_scores))
+    frame_auc = roc_auc_score(y_true=np.squeeze(labels, axis=0), 
+                              y_score=np.squeeze(anomal_scores))
 
     return frame_auc
 
 
 def plot_ROC(anomal_scores, labels, auc, log_dir, dataset_type, method, trained_model_using):
     # plot ROC curve
-    fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(
-        labels, axis=0), y_score=np.squeeze(anomal_scores))
+    fpr, tpr, _ = metrics.roc_curve(y_true=np.squeeze(labels, axis=0), 
+                                    y_score=np.squeeze(anomal_scores))
 
     # create ROC curve
     plt.title('Receiver Operating Characteristic \nmethod: ' +
@@ -138,6 +138,51 @@ def score_sum(list1, list2, alpha):
     return list_result
 
 
+def load_pixelLabel_frames(dataset_type='ped2'):
+    label_input_path = []
+    label_dir = []
+    label_dir_distinct = []
+    cur_path = './dataset/' + dataset_type + '/testing/labels'
+    for path, _, files in os.walk(cur_path):
+        for name in files:
+            if(path not in label_dir_distinct):
+                label_dir_distinct.append(path)
+            label_input_path.append(os.path.join(path, name))
+            label_dir.append(path)
+    label_input_path.sort()
+    label_dir.sort()
+    label_dir_distinct.sort()
+
+    label_list = []
+    for i in range(len(label_input_path)):
+        label_img = cv2.imread(label_input_path[i])
+        label_list.append(label_img)
+
+    return label_list
+
+
+def load_predict_frames(dataset_type):
+    pred_input_path = []
+    cur_path = './dataset/' + dataset_type + '/output/frames'
+    for path, _, files in os.walk(cur_path):
+        for name in files:
+            pred_input_path.append(os.path.join(path, name))
+    pred_input_path.sort()
+
+    pred_input_imgs = []
+    for i in range(len(pred_input_path)):
+        img = cv2.imread(pred_input_path[i])
+        pred_input_imgs.append(img)
+
+    return pred_input_imgs
+
+
+def AUC_pixel_level():
+    labels_frames = load_pixelLabel_frames(dataset_type='ped2')
+    predicted_frames = load_predict_frames(dataset_type='ped2')
+    
+
+
 def optimal_threshold(anomal_scores, labels):
     y_true = 1 - labels
     y_score = np.squeeze(anomal_scores)
@@ -148,6 +193,7 @@ def optimal_threshold(anomal_scores, labels):
     # locate the index of the largest g-mean
     ix = np.argmax(gmeans)
     return threshold[ix]
+
 
 
 def average_score(anomaly_score, opt_threshold):

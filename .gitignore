@@ -6,5 +6,8 @@ sandbox-test
 raw-dataset
 __pycache__
 output_dataset
+paper_trained_model
+.idea
+.env
 pre_trained_model/**/*.pt
 pre_trained_model/**/*.pth

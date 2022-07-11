@@ -99,7 +99,7 @@ class Memory(nn.Module):
                 idx = torch.nonzero(flag)  # indices of nonzero values
                 a, _ = idx.size()
                 if a != 0:
-                    v_tk = score[idx, i]
+                    v_tk = score[idx, i] # v
                     max_vtk = torch.max(score[:, i])
                     v_comma = v_tk / max_vtk
                     query_value = query[idx].squeeze(1)
