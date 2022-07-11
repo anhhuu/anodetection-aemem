@@ -12,8 +12,6 @@ from model.utils import DataLoader
 from utils import *
 from datetime import datetime
 import argparse
-from pytorchtools import EarlyStopping
-
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -75,7 +73,9 @@ train_folder = args.dataset_path+"/"+args.dataset_type+"/training/frames"
 
 # Loading dataset
 print('Loading dataset...')
-train_dataset = DataLoader(train_folder, transforms.Compose([transforms.ToTensor(),]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+train_dataset = DataLoader(train_folder, transforms.Compose([
+    transforms.ToTensor(),
+]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
 
 train_size = len(train_dataset)
@@ -83,6 +83,7 @@ train_size = len(train_dataset)
 train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.num_workers, drop_last=True)
 print('Loading dataset is finished')
+
 
 # Model setting
 print('Model setting...')
@@ -92,7 +93,8 @@ if args.method == 'pred':
     model = convAE(args.c, args.t_length, args.msize, args.fdim, args.mdim)
 else:
     from model.Reconstruction import *
-    model = convAE(args.c, memory_size=args.msize, feature_dim=args.fdim, key_dim=args.mdim)
+    model = convAE(args.c, memory_size=args.msize,
+                   feature_dim=args.fdim, key_dim=args.mdim)
 params_encoder = list(model.encoder.parameters())
 params_decoder = list(model.decoder.parameters())
 params = params_encoder + params_decoder
@@ -111,9 +113,6 @@ f = open(os.path.join(log_dir, 'log.txt'), 'w')
 sys.stdout = f
 
 loss_func_mse = nn.MSELoss(reduction='none')
-
-#import pytorch_ssim
-#loss_ssim = pytorch_ssim.SSIM()
 
 # Training
 print('Start training...')
@@ -137,7 +136,7 @@ for epoch in range(args.epochs):
 
         else:
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
-                imgs, m_items, True)                                                    
+                imgs, m_items, True)
 
         optimizer.zero_grad()
         if args.method == 'pred':
