@@ -1,11 +1,18 @@
-| Model name                 | Ped1 (%AUC)                       | Ped2 (%AUC)                    | Avenue (%AUC)                   |
-| -------------------------- | --------------------------------- | ------------------------------ | ------------------------------- |
-| papers                     | x                                 | <i> 96.97                      | <i>88.52                        |
-| re-trained default         | <i>80.70                          | <i> 93.97                      | <i>82.96                        |
-| papers + rand              | x                                 | 95.37                          | 88.41                           |
-| re-trained default + rand  | 80.05                             | 92.33                          |                                 |
-| re-trained default + recon | <b>80.36                          | <b>93.49                       |                                 |
-| highest + recon            | (model `inframes = 5`): <b> 82.45 | (model `msize = 9`): <b> 95.96 | `inframes = 5; msize = 9`: \_\_ |
+# Defaults
+
+| Model name             | Ped1 (%AUC) | Ped2 (%AUC) | Avenue (%AUC) |
+| ---------------------- | ----------- | ----------- | ------------- |
+| <i> papers             | x           | <i> 96.97   | <i>88.52      |
+| <i> re-trained default | <i>80.70    | <i> 93.97   | <i>82.96      |
+
+# Combine (pred and recon)
+
+| Model name                                      | Ped1 (%AUC)                 | Ped2 (%AUC)              | Avenue (%AUC)                        |
+| ----------------------------------------------- | --------------------------- | ------------------------ | ------------------------------------ |
+| papers + rand                                   | x                           | <b> 95.37                | <b> 88.40                            |
+| <i><u> re-trained default + rand (<b>milestone) | <i><u> 80.05                | <i><u> 92.33             | <i><u> 82.83                         |
+| re-trained default + recon                      | <b> 80.36                   | <b> 93.49                | <b> 82.86                            |
+| highest + recon                                 | (`inframes = 5`): <b> 82.45 | (`msize = 9`): <b> 95.96 | `inframes = 5; msize = 9`: <b> 85.30 |
 
 NOTE: For avenue dataset, anomalies rarely appear in the early frames.
 
