@@ -15,6 +15,7 @@ import glob
 import argparse
 import cv2
 from datetime import datetime
+import torchgeometry as tgm
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -69,7 +70,8 @@ test_folder = args.dataset_path+"/"+args.dataset_type+"/testing/frames"
 
 # load the dataset and convert a ndarray image/frame into a float tensor. Then scale the image/frame
 # pixel intensity value in the range [-1, 1]
-test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(), ]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+test_dataset = DataLoader(test_folder, transforms.Compose([transforms.ToTensor(), ]),
+                          resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 # dataset length
 test_size = len(test_dataset)
 
@@ -79,10 +81,12 @@ test_size = len(test_dataset)
 #   + shuffle: not shuffle due to sequential data
 #   + num_workers: how many subprocesses to use for data loading
 #   + drop_last: If the size of dataset is not divisible by the batch size, then the last batch will be smaller
-test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size, shuffle=False, num_workers=args.num_workers_test, drop_last=False)
+test_batch = data.DataLoader(test_dataset, batch_size=args.test_batch_size,
+                             shuffle=False, num_workers=args.num_workers_test, drop_last=False)
 
 # define Mean Error Loss
 loss_func_mse = nn.MSELoss(reduction='none')
+loss_func_ssim = tgm.losses.SSIM(5, reduction='none')
 
 # Loading the trained model
 model = torch.load(args.model_dir)
@@ -118,7 +122,8 @@ elif "avenue" in args.model_dir:
 elif "shanghai" in args.model_dir:
     trained_model_using = "shanghai"
 
-print('Start Evaluation of:', args.dataset_type + ',', 'method:', args.method + ',', 'trained model used:', trained_model_using)
+print('Start Evaluation of:', args.dataset_type + ',', 'method:',
+      args.method + ',', 'trained model used:', trained_model_using)
 
 # setting for video anomaly detection
 for video in sorted(videos_list):
@@ -161,19 +166,26 @@ for k, (imgs) in enumerate(test_batch):
     if args.method == 'pred':
         if k == label_length-(args.t_length-1)*(video_num+1):
             video_num += 1
-            label_length += videos[videos_list[video_num].split('/')[-1]]['length']
+            label_length += videos[videos_list[video_num]
+                                   .split('/')[-1]]['length']
     else:
         if k == label_length:
             video_num += 1
-            label_length += videos[videos_list[video_num].split('/')[-1]]['length']
+            label_length += videos[videos_list[video_num]
+                                   .split('/')[-1]]['length']
 
     imgs = Variable(imgs).cuda()
 
     if args.method == 'pred':
         outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, _, _, _, compactness_loss = model.forward(
             imgs[:, 0:3*(args.t_length-1)], m_items_test, False)
-        mse_imgs = torch.mean(loss_func_mse(
-            (outputs[0]+1)/2, (imgs[0, 3*(args.t_length-1):]+1)/2)).item()
+
+        pred_image = (outputs[0]+1)/2
+        pred_image = torch.unsqueeze(pred_image, 0)
+        ground_truth_image = (imgs[0, 3*(args.t_length-1):]+1)/2
+        ground_truth_image = torch.unsqueeze(ground_truth_image, 0)
+        loss_SSIM = loss_func_ssim(ground_truth_image, pred_image)
+        mse_imgs = torch.mean(loss_SSIM).item()
         mse_feas = compactness_loss.item()
 
         # Calculating the threshold for updating at the test time
@@ -203,8 +215,10 @@ for k, (imgs) in enumerate(test_batch):
             cv2.imwrite(img_name_dir, img_out_clone)
 
     else:
-        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(imgs, m_items_test, False)
-        mse_imgs = torch.mean(loss_func_mse((outputs[0]+1)/2, (imgs[0]+1)/2)).item()
+        outputs, feas, updated_feas, m_items_test, softmax_score_query, softmax_score_memory, compactness_loss = model.forward(
+            imgs, m_items_test, False)
+        mse_imgs = torch.mean(loss_func_mse(
+            (outputs[0]+1)/2, (imgs[0]+1)/2)).item()
         mse_feas = compactness_loss.item()
 
         # Calculating the threshold for updating at the test time
@@ -243,7 +257,8 @@ for k, (imgs) in enumerate(test_batch):
     psnr_index = videos_list[video_num].split('/')[-1]
     psnr_list[psnr_index].append(psnr_score)
     # append compactness lost of current frame to compactness list
-    feature_distance_list[videos_list[video_num].split('/')[-1]].append(mse_feas)
+    feature_distance_list[videos_list[video_num].split(
+        '/')[-1]].append(mse_feas)
 
     if k % 1000 == 0:
         print('DONE:', k, "frames")
@@ -260,10 +275,12 @@ for video in sorted(videos_list):
 
     feature_distance_list_of_video = feature_distance_list[video_name]
     # min-max normalization for compactness loss
-    anomaly_score_list_inv_of_video = anomaly_score_list_inv(feature_distance_list_of_video)
+    anomaly_score_list_inv_of_video = anomaly_score_list_inv(
+        feature_distance_list_of_video)
 
     # Sum score for anomaly rate
-    score = score_sum(anomaly_score_list_of_video, anomaly_score_list_inv_of_video, args.alpha)
+    score = score_sum(anomaly_score_list_of_video,
+                      anomaly_score_list_inv_of_video, args.alpha)
 
     # Append score to total list
     anomaly_score_total_list += score
@@ -274,8 +291,6 @@ print('Number of frames:', len(labels[0]))
 print('len of anomaly score:', len(anomaly_score_total_list))
 
 accuracy = AUC(anomaly_score_total_list, np.expand_dims(1-labels_list, 0))
-opt_threshold = optimal_threshold(
-    anomaly_score_total_list, labels_list)
 
 log_dir = os.path.join('./exp', args.dataset_type, args.method, args.exp_dir)
 if not os.path.exists(log_dir):
@@ -291,11 +306,7 @@ np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
-print('optimal_threshold:', opt_threshold)
-nomaly_average_score, anomaly_average_score = average_score(
-    anomaly_score_total_list, opt_threshold)
-print('nomaly_average_score:', nomaly_average_score)
-print('anomaly_average_score:', anomaly_average_score)
+
 
 end_time = datetime.now()
 time_range = end_time-start_time

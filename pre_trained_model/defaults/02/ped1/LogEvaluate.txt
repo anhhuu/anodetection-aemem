@@ -1,0 +1,7 @@
+Start time: 06/07/2022 00:35:56
+Start Evaluation of: ped1, method: pred, trained model used: ped1
+Number of frames: 7200
+len of anomaly score: 7056
+The result of ped1
+AUC: 77.37434543138907 %
+Evaluate is taken:  0:04:28.988751

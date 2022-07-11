@@ -1,0 +1,17 @@
+Start time: 22/06/2022 01:43:35
+Start Evaluation of: avenue, method: pred, trained model used: avenue
+Number of frames: 15324
+len of anomaly score: 15240
+The result of avenue
+AUC: 86.5518499760445 %
+Evaluate is taken:  5:27:34.095190
+
+
+DEPRECATED
+/*Start time: 06/07/2022 07:25:32
+Start Evaluation of: avenue, method: pred, trained model used: avenue
+Number of frames: 15324
+len of anomaly score: 15240
+The result of avenue
+AUC: 82.95598499760945 %
+Evaluate is taken:  6:57:54.095190*/

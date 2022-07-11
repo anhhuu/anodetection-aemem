@@ -12,8 +12,7 @@ from model.utils import DataLoader
 from utils import *
 from datetime import datetime
 import argparse
-from pytorchtools import EarlyStopping
-
+import torchgeometry as tgm
 
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
@@ -75,7 +74,9 @@ train_folder = args.dataset_path+"/"+args.dataset_type+"/training/frames"
 
 # Loading dataset
 print('Loading dataset...')
-train_dataset = DataLoader(train_folder, transforms.Compose([transforms.ToTensor(),]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
+train_dataset = DataLoader(train_folder, transforms.Compose([
+    transforms.ToTensor(),
+]), resize_height=args.h, resize_width=args.w, time_step=args.t_length-1)
 
 
 train_size = len(train_dataset)
@@ -84,15 +85,17 @@ train_batch = data.DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.num_workers, drop_last=True)
 print('Loading dataset is finished')
 
+
 # Model setting
 print('Model setting...')
-assert args.method == 'pred' or args.method == 'recons', 'Wrong task name'
+assert args.method == 'pred' or args.method == 'recon', 'Wrong task name'
 if args.method == 'pred':
     from model.final_future_prediction_with_memory_spatial_sumonly_weight_ranking_top1 import *
     model = convAE(args.c, args.t_length, args.msize, args.fdim, args.mdim)
 else:
     from model.Reconstruction import *
-    model = convAE(args.c, memory_size=args.msize, feature_dim=args.fdim, key_dim=args.mdim)
+    model = convAE(args.c, memory_size=args.msize,
+                   feature_dim=args.fdim, key_dim=args.mdim)
 params_encoder = list(model.encoder.parameters())
 params_decoder = list(model.decoder.parameters())
 params = params_encoder + params_decoder
@@ -111,9 +114,7 @@ f = open(os.path.join(log_dir, 'log.txt'), 'w')
 sys.stdout = f
 
 loss_func_mse = nn.MSELoss(reduction='none')
-
-#import pytorch_ssim
-#loss_ssim = pytorch_ssim.SSIM()
+loss_func_ssim = tgm.losses.SSIM(7, reduction='none')
 
 # Training
 print('Start training...')
@@ -137,15 +138,16 @@ for epoch in range(args.epochs):
 
         else:
             outputs, _, _, m_items, softmax_score_query, softmax_score_memory, separateness_loss, compactness_loss = model.forward(
-                imgs, m_items, True)                                                    
+                imgs, m_items, True)
 
         optimizer.zero_grad()
         if args.method == 'pred':
             first_index = (args.t_length - 1) * 3
-            loss_pixel = torch.mean(loss_func_mse(
-                outputs, imgs[:, first_index:]))
+            loss_SSIM = loss_func_ssim(outputs, imgs[:, first_index:])
+            loss_pixel = torch.mean(loss_SSIM)
         else:
-            loss_pixel = torch.mean(loss_func_mse(outputs, imgs))
+            loss_SSIM = loss_func_ssim(outputs, imgs)
+            loss_pixel = torch.mean(loss_SSIM)
 
         loss = loss_pixel + args.loss_compact * compactness_loss + \
             args.loss_separate * separateness_loss
@@ -165,6 +167,15 @@ for epoch in range(args.epochs):
     print('Memory_items:')
     print(m_items)
     print('----------------------------------------')
+    prefix_output_name = args.dataset_type
+    if args.method == 'pred':
+        prefix_output_name = prefix_output_name + \
+            '_prediction_epoch_' + str(epoch+1) + '_'
+    else:
+        prefix_output_name = prefix_output_name + \
+            '_reconstruction_epoch_' + str(epoch+1) + '_'
+    torch.save(model, os.path.join(log_dir, prefix_output_name + 'model.pth'))
+    torch.save(m_items, os.path.join(log_dir, prefix_output_name + 'keys.pt'))
 
 print('Training is finished')
 # Save the model and the memory items

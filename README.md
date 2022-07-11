@@ -1,6 +1,6 @@
 # anodetection-aemem
 
-![image](https://user-images.githubusercontent.com/19743019/175104995-0ecf8bf3-8069-4406-ac8d-42da3770fa25.png)
+![image](./demo_images/avenue_demo.png)
 
 Anomaly detection using autoencoder and memory module.
 
@@ -13,7 +13,7 @@ Anomaly detection using autoencoder and memory module.
 
 Use this folder structure, copy dataset into folder `./dataset/`. For example, `./dataset/ped2/`.
 
-1. Training: You can freely define parameters with your own settings like
+1. Training: Use this command, and you can freely define parameters with your own settings like
 
 ```
 python3 Train.py --dataset_type dataset_type
@@ -25,6 +25,12 @@ Example for `avenue`:
 python3 Train.py --dataset_type avenue
 ```
 
+Need to help? Run this command:
+
+```
+python3 Train.py -h
+```
+
 2. Evaluation
 
 ```
@@ -34,7 +40,13 @@ python3 Evaluate.py --dataset_type dataset_type --model_dir your_model.pth --m_i
 Example for `avenue`:
 
 ```
-python3 Evaluate.py --dataset_type avenue --model_dir ./my_trained_model/avenue_prediction_model.pth --m_items_dir ./my_trained_model/avenue_prediction_keys.pt
+python3 Evaluate.py --dataset_type avenue --model_dir ./pre_trained_model/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/avenue_prediction_keys.pt
+```
+
+Need to help? Run this command:
+
+```
+python3 Evaluate.py -h
 ```
 
 2. Run demo app
@@ -51,9 +63,13 @@ python3 app.py --method pred --dataset_type avenue
 
 ## Model
 
-### My trained model
+### pre-trained model
 
-#### Prediction
+#### Fully pre-trained
+
+-   [[fully pre-trained]](https://drive.google.com/drive/folders/1nP1O9YaZ3TW_CraeI9iuFggKc6Kl324L?usp=sharing): Please download and place it into root folder of project
+
+#### Prediction hightest
 
 -   [[ped1]](https://drive.google.com/file/d/1qMFZ2umfqJTh6vw6KjrW9dbj0fRy0A-Z/view?usp=sharing)
 -   [[ped2]](https://drive.google.com/file/d/1luwmkFoFFJNqgLGJEA2MoUod71EfTuHf/view?usp=sharing)
@@ -69,3 +85,17 @@ python3 app.py --method pred --dataset_type avenue
 ## Works Cited
 
 -   [[Learning Memory-guided Normality for Anomaly Detection]](https://openaccess.thecvf.com/content_CVPR_2020/papers/Park_Learning_Memory-Guided_Normality_for_Anomaly_Detection_CVPR_2020_paper.pdf) - [[Github]](https://github.com/cvlab-yonsei/MNAD/tree/master)
+
+## Demo Images
+
+### Avenue
+
+![image](./demo_images/avenue_demo.png)
+
+### Ped1
+
+![image](./demo_images/ped1_demo.png)
+
+### Ped2
+
+![image](./demo_images/ped2_demo.png)

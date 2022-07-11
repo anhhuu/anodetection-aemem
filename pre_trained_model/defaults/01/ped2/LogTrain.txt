@@ -1,0 +1,10 @@
+Start time: 05/07/2022 19:15:01
+Dataset:  ped2
+Method:  pred
+Loading dataset...
+Loading dataset is finished
+Model setting...
+Setting up model is finished
+Start training and logging into file
+Training is finished
+Training is taken:  3:35:35.347297

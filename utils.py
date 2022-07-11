@@ -2,13 +2,11 @@ import numpy as np
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import math
 import copy
 from sklearn.metrics import roc_auc_score
 from sklearn import metrics
-from matplotlib.pyplot import figure
 from matplotlib import colors
 import cv2
 
@@ -184,16 +182,31 @@ def AUC_pixel_level():
     predicted_frames = load_predict_frames(dataset_type='ped2')
     
 
-def optimalThreshold(anomal_scores, labels):
-    y_true = 1 - labels[0, :1962]
-    y_true = np.squeeze(y_true)
-    y_score = np.squeeze(anomal_scores[:1962])
+
+def optimal_threshold(anomal_scores, labels):
+    y_true = 1 - labels
+    y_score = np.squeeze(anomal_scores)
     fpr, tpr, threshold = metrics.roc_curve(y_true, y_score)
     frame_auc = metrics.roc_auc_score(y_true, y_score)
-    print("AUC: {}".format(frame_auc))
     # calculate the g-mean for each threshold
     gmeans = np.sqrt(tpr * (1-fpr))
     # locate the index of the largest g-mean
     ix = np.argmax(gmeans)
     print('Best Threshold=%f, G-Mean=%.3f' % (threshold[ix], gmeans[ix]))
     return threshold[ix]
+
+
+
+def average_score(anomaly_score, opt_threshold):
+    count_nomaly = 0
+    sum_nomaly = 0
+    count_anomaly = 0
+    sum_anomaly = 0
+    for i in range(len(anomaly_score)):
+        if anomaly_score[i] < opt_threshold:
+            sum_anomaly += anomaly_score[i]
+            count_anomaly += 1
+        else:
+            sum_nomaly += anomaly_score[i]
+            count_nomaly += 1
+    return sum_nomaly/count_nomaly, sum_anomaly/count_anomaly

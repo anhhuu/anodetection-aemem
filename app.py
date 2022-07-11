@@ -2,6 +2,7 @@ import argparse
 import threading
 import pandas as pd
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
+
 from matplotlib.animation import FuncAnimation
 import tkinter as tk
 import os
@@ -130,14 +131,7 @@ class App:
                                       fg='white', bg="#263D42")
         self.open_dataset.pack(anchor=tk.CENTER, expand=True)
 
-    def snapshot(self):
-        # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
-
-        if ret:
-            cv2.imwrite("frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") +
-                        ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-
+    # Use for realtime camera
     def update(self):
         # Get a frame from the video source
         #ret, frame = self.vid.get_frame()
@@ -246,22 +240,6 @@ class App:
         plt.xlabel('Frames')
         return fig
 
-    def animate(self, i):
-        data = pd.read_csv('data.csv')
-        x = data['x_value']
-        y1 = data['total_1']
-        y2 = data['total_2']
-
-        # Declare a clear axis each time
-        plt.cla()
-
-        # create a legend
-        plt.plot(x, y1, label='Channel 1')
-        plt.plot(x, y2, label='Channel 2')
-        plt.legend(loc='upper left')
-        plt.tight_layout()
-        return plt.gcf()
-
     def static_animate(self, i):
         y_score = np.squeeze(self.vid.frame_scores[:self.iter_frame+1])
 
@@ -329,6 +307,7 @@ class VideoCapture:
             # PIXEL-LEVEL data
             self.pixelLabels = self.load_pixelLabel_frames()
             self.pixel_detected_frames = self.load_pixel_detected_frames()
+
 
     def get_frame(self):
         # if self.vid.isOpened():
