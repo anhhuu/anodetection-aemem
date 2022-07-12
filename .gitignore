@@ -11,3 +11,5 @@ paper_trained_model
 .env
 pre_trained_model/**/*.pt
 pre_trained_model/**/*.pth
+trained_temp_model/**/*.pt
+trained_temp_model/**/*.pth
