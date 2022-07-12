@@ -1,13 +1,13 @@
-| Params                                                                                            | Ped1 (%AUC) | Ped2 (%AUC) |
-| ------------------------------------------------------------------------------------------------- | ----------- | ----------- |
-| `loss_compact = 0.05` <br/> `loss_separate = 0.5` <br /> `lr = 15e5` <br /> `epochs = 100` <br /> |             | 90.00       |
+| Params                                                                              | Ped1 (%AUC) | Ped2 (%AUC) |
+| ----------------------------------------------------------------------------------- | ----------- | ----------- |
+| `loss_compact = 0.05, loss_separate = 0.05` <br /> `lr = 15e5, epochs = 100` <br /> |             | 90.00       |
 
 ## Template commands
 
 ### Train
 
 ```bash
-python3 Train.py --method <method> --dataset_type <dataset_type>
+python3 TrainWithSSIMLoss.py --method <method> --dataset_type <dataset_type>
 
 ```
 
@@ -16,8 +16,6 @@ python3 Train.py --method <method> --dataset_type <dataset_type>
 ```
 python3 EvaluateWithSSIMLoss.py --method <method> --dataset_type <dataset_type> --model_dir ./pre_trained_model/ssim/<model>.pth --m_items_dir ./pre_trained_model/ssim/<keys>.pt
 ```
-
-python3 EvaluateWithSSIMLoss.py --method pred --dataset_type ped2 --model_dir ./pre_trained_model/ssim/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/ssim/ped2_prediction_keys.pt
 
 ### PED2
 
