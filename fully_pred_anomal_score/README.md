@@ -11,7 +11,8 @@
 | -------------------------------------------- | --------------------------- | ------------------------ | -------------------------------------- |
 | papers + rand                                | x                           | <b> 95.37                | <b> 88.40                              |
 | <i> re-trained default + rand <b>(milestone) | <i> 80.05                   | <i> 92.33                | <i> 82.83                              |
-| re-trained default + recon                   | <b> 80.36                   | <b> 93.49                | <b> 82.86                              |
+| re-trained default + recon                   | <b> 80.36                   | <b> 93.49                | <b> 83.64                              |
+| (`inframes = 3; msize = 11`) + recon         | <b> 80.38                   | <b> 96.01                | <b> 83.64                              |
 | highest + recon                              | (`inframes = 5`): <b> 82.45 | (`msize = 9`): <b> 95.96 | (`inframes = 5; msize = 9`): <b> 85.30 |
 
 NOTE: For avenue dataset, anomalies rarely appear in the early frames.
@@ -100,7 +101,45 @@ python3 EvaluateCombine.py \
 --recon_m_items_dir ./pre_trained_model/recon/avenue_reconstruction_keys.pt
 ```
 
-## 4. highest + recon
+## 4. (`inframes = 3; msize = 11`) + recon
+
+#### Ped1
+
+```
+python3 EvaluateCombine.py \
+--dataset_type ped1 \
+--t_length 4 \
+--pred_model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-11/ped1_prediction_model.pth \
+--pred_m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-11/ped1_prediction_keys.pt \
+--recon_model_dir ./pre_trained_model/recon/ped1_reconstruction_model.pth \
+--recon_m_items_dir ./pre_trained_model/recon/ped1_reconstruction_keys.pt
+```
+
+#### Ped2
+
+```
+python3 EvaluateCombine.py \
+--dataset_type ped2 \
+--t_length 4 \
+--pred_model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-11/ped2_prediction_model.pth \
+--pred_m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-11/ped2_prediction_keys.pt \
+--recon_model_dir ./pre_trained_model/recon/ped2_reconstruction_model.pth \
+--recon_m_items_dir ./pre_trained_model/recon/ped2_reconstruction_keys.pt
+```
+
+#### Avenue
+
+```
+python3 EvaluateCombine.py \
+--dataset_type avenue \
+--t_length 4 \
+--pred_model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_model.pth \
+--pred_m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_keys.pt \
+--recon_model_dir ./pre_trained_model/recon/avenue_reconstruction_model.pth \
+--recon_m_items_dir ./pre_trained_model/recon/avenue_reconstruction_keys.pt
+```
+
+## 5. highest + recon
 
 #### Ped1
 

@@ -31,7 +31,7 @@ Training is finished
 Training is taken:  5:26:46.347799
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type ped1 --t_length 4 --msize 9 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped1_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped1_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type ped1 --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped1_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped1_prediction_keys.pt
 
 Start time: 09/07/2022 12:17:46
 Start Evaluation of: ped1, method: pred, trained model used: ped1
@@ -59,7 +59,7 @@ Training is finished
 Training is taken:  1:56:35.334922
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --msize 9 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type ped2 --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/ped2_prediction_keys.pt
 
 Start time: 07/07/2022 10:32:37
 Start Evaluation of: ped2, method: pred, trained model used: ped2
@@ -89,7 +89,7 @@ Training is finished
 Training is taken:  12:05:04.272251
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type avenue --t_length 4 --msize 9 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type avenue --t_length 4 --model_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/03-and-09/avenue_prediction_keys.pt
 
 Start time: 07/07/2022 10:29:39
 Start Evaluation of: avenue, method: pred, trained model used: avenue

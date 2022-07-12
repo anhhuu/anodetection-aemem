@@ -88,7 +88,8 @@ Training is finished
 Training is taken:  17:29:02.114667
 
 -----------------------------------------------------------------------------
-python3 Evaluate.py --method pred --dataset_type avenue --t_length 6 --model_dir ./exp/avenue/pred/log/avenue_prediction_model.pth --m_items_dir ./exp/avenue/pred/log/avenue_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type avenue --t_length 6 --model_dir ./pre_trained_model/inframes-and-msize_changed/05-and-11/avenue_prediction_model.pth --m_items_dir ./pre_trained_model/inframes-and-msize_changed/05-and-11/avenue_prediction_keys.pt
+
 
 Start time: 05/07/2022 01:24:14
 Start Evaluation of: avenue, method: pred, trained model used: avenue
