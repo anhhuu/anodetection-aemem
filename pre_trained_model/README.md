@@ -1,9 +1,7 @@
-## Updated at: 22:32 - 08/07/2022
-
 | Name                        | Params                        | Ped1 (%AUC) | Ped2 (%AUC) | Avenue (%AUC) |
 | --------------------------- | ----------------------------- | ----------- | ----------- | ------------- |
 | papers                      | `inframes = 4; msize = 10`    | x           | 96.97       | 88.52         |
-| <i> defaults (<b>milestone) | <i>`inframes = 4; msize = 10` | <i>80.7     | <i>93.97    | <i>82.96      |
+| <i> defaults <b>(milestone) | <i>`inframes = 4; msize = 10` | <i>80.70    | <i>93.97    | <i>82.96      |
 | inframes changed            | `inframes = 3`                | 80.64       | <b>95.05    | <b>83.89      |
 | inframes changed            | `inframes = 5`                | <b>82.89    | 92.98       | <b>85.23      |
 | msize changed               | `msize = 9`                   | 74.92       | <b>96.51    | 81.69         |

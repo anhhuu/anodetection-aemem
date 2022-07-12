@@ -10,7 +10,7 @@
 | Model name                                   | Ped1 (%AUC)                 | Ped2 (%AUC)              | Avenue (%AUC)                          |
 | -------------------------------------------- | --------------------------- | ------------------------ | -------------------------------------- |
 | papers + rand                                | x                           | <b> 95.37                | <b> 88.40                              |
-| <i> re-trained default + rand (<b>milestone) | <i> 80.05                   | <i> 92.33                | <i> 82.83                              |
+| <i> re-trained default + rand <b>(milestone) | <i> 80.05                   | <i> 92.33                | <i> 82.83                              |
 | re-trained default + recon                   | <b> 80.36                   | <b> 93.49                | <b> 82.86                              |
 | highest + recon                              | (`inframes = 5`): <b> 82.45 | (`msize = 9`): <b> 95.96 | (`inframes = 5; msize = 9`): <b> 85.30 |
 
