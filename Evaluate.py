@@ -160,6 +160,7 @@ if not os.path.exists(output_frames_dir):
 # Iterate on each frame of the whole dataset, forward through the model
 # predict: img ndim = 4, shape ([1, 15, 256, 256])
 # recons: img ndim = 4, shape ([1, 3, 256, 256])
+fps_start_time = datetime.now()
 for k, (imgs) in enumerate(test_batch):
     if args.method == 'pred':
         if k == label_length-(args.t_length-1)*(video_num+1):
@@ -255,6 +256,7 @@ for k, (imgs) in enumerate(test_batch):
 
     if k % 1000 == 0:
         print('DONE:', k, "frames")
+fps_end_time = datetime.now()
 
 
 # Measuring the abnormality score and the AUC
@@ -306,6 +308,8 @@ nomaly_average_score, anomaly_average_score = average_score(
     anomaly_score_total_list, opt_threshold)
 print('nomaly_average_score:', nomaly_average_score)
 print('anomaly_average_score:', anomaly_average_score)
+print('fps evaluate:', len(labels[0]) /
+      ((fps_end_time - fps_start_time).seconds))
 
 end_time = datetime.now()
 time_range = end_time-start_time
