@@ -18,17 +18,17 @@ parser = argparse.ArgumentParser(description="anomaly detection using aemem")
 parser.add_argument('--gpus', nargs='+', type=str, help='gpus')
 parser.add_argument('--batch_size', type=int, default=4,
                     help='batch size for training')
-parser.add_argument('--epochs', type=int, default=60,
+parser.add_argument('--epochs', type=int, default=100,
                     help='number of epochs for training')
-parser.add_argument('--loss_compact', type=float, default=0.1,
+parser.add_argument('--loss_compact', type=float, default=0.05,
                     help='weight of the feature compactness loss')
-parser.add_argument('--loss_separate', type=float, default=0.1,
+parser.add_argument('--loss_separate', type=float, default=0.05,
                     help='weight of the feature separateness loss')
 parser.add_argument('--h', type=int, default=256,
                     help='height of input images')
 parser.add_argument('--w', type=int, default=256, help='width of input images')
 parser.add_argument('--c', type=int, default=3, help='channel of input images')
-parser.add_argument('--lr', type=float, default=2e-4,
+parser.add_argument('--lr', type=float, default=15e-5,
                     help='initial learning rate')
 parser.add_argument('--method', type=str, default='pred',
                     help='The target task for anoamly detection')
