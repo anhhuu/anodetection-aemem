@@ -300,6 +300,8 @@ plot_anomaly_scores(anomaly_score_total_list,
                     labels[0], log_dir, args.dataset_type, args.method, trained_model_using)
 
 np.save(os.path.join(output_dir, 'anomaly_score.npy'), anomaly_score_total_list)
+np.save(os.path.join(output_dir, 'optimal_threshold.npy'),
+        np.array([opt_threshold]))
 
 print('The result of', args.dataset_type)
 print('AUC:', accuracy*100, '%')
