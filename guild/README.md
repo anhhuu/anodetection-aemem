@@ -2,19 +2,25 @@
 
 # 1. Cấu trúc thư mục
 
-```go
+```c++
 .
-├── app.py                              // Ứng dụng demo
-├── data                                // Thư mục chứa nhãn khung hình của các tập dữ liệu
-│   ├── data_seqkey_all.py
+├── AppDemo.py                          // Ứng dụng demo
+├── common                              // Hằng số của ứng dụng demo
+│   └── consts.py
+├── cross_evaluate                      // Kết quả đánh giá chéo mô hình
+│   └── README.md
+├── data_labels                         // Thư mục chứa nhãn khung hình của các tập dữ liệu
+│   ├── frame_labels_avenue.npy
 │   ├── frame_labels_ped1.npy
+│   ├── frame_labels_ped1_rebuild.npy
 │   ├── frame_labels_ped2.npy
-│   └── frame_labels_avenue.npy
-├── dataset                             // Thư mục chứa tập dữ liệu
+│   └── frame_labels_shanghai.npy
+├── dataset                             // Thư mục chứa tập dữ liệu (huấn luyện/kiểm thử/chạy demo)
 │   ├── ped1
 │   │   │── output                      // Thư mục chứa khung hình tái tạo/dự đoán
 │   │   │    │── anomaly_score.npy      // File đánh giá điểm bất thường của khung hình
 │   │   │    │                          // sau khi chạy đánh giá với tập dữ liệu tương ứng
+│   │   │    │── optimal_threshold.npy  // File lưu trữ threshold tối ưu sau khi đánh giá
 │   │   │    └── frames
 │   │   │── training                    // Thư mục chứa khung hình huấn luyện
 │   │   │    └── frames
@@ -22,11 +28,18 @@
 │   │        └── frames
 │   ├── ped2
 │   └── avenue
-├── Evaluate.py                         // Mô-đun đánh giá mô hình
-├── exp                                 // Thư mục chứa log, đầu ra trong quá trình huấn luyện, đánh giá mô hình
-│   ├── ped1
-│   ├── ped2
-│   └── avenue
+├── EvaluateCombine.py                  // Mô-đun đánh giá mô hình (không bỏ qua những khung hình đầu tiên)
+├── Evaluate_PixelLevel.py              // Mô-đun đánh giá mô hình với mức điểm ảnh
+├── EvaluatePredFullFrame.py            // Mô-đun đánh giá mô hình (dự đoán ngẫu nhiên những khung hình đầu tiên)
+├── Evaluate.py                         // Mô-đun đánh giá mô hình (bỏ qua những khung hình đầu tiên)
+├── EvaluateWithSSIMLoss.py             // Mô-đun đánh giá mô hình với hàm lỗi SSIM
+├── fully_pred_anomal_score             // Kết quả đánh giá mô hình kết hợp (không bỏ qua những khung hình đầu tiên)
+│   └── README.md
+├── guild
+│   └── README.md
+├── helpers                             // Hỗ trợ gắn nhãn
+│   ├── get_avenue_pixel_labels.py
+│   └── get_ped1_frame_labes.py
 ├── image_similarity                    // Mô-đun đánh giá khung hình tái tạo, dự đoán so với khung hình gốc
 │   ├── CompareFeatures.py
 │   ├── CompareHistogram.py
@@ -37,15 +50,39 @@
 │   ├── Memory.py
 │   ├── Reconstruction.py
 │   └── utils.py
-├── pre_trained_model                    // Thư mục chứa mô hình dự đoán khung hình do nhóm huấn luyện
-│   ├── avenue_prediction_keys.pt
-│   ├── avenue_prediction_model.pth
-│   ├── ped1_prediction_keys.pt
-│   ├── ped1_prediction_model.pth
-│   ├── ped2_prediction_keys.pt
-│   └── ped2_prediction_model.pth
+├── pre_trained_model                   // Thư mục chứa mô hình do nhóm huấn luyện
+│   ├── defaults                        // Mô hình với tham số mặc định và cmd chạy
+│   │   └── README.md
+│   ├── inframes-and-msize_changed      // Mô hình với thay đổi phần tử bộ nhớ và khung hình đầu vào và cmd chạy
+│   │   ├── 03-and-09
+│   │   │   └── README.md
+│   │   ├── 03-and-11
+│   │   │   └── README.md
+│   │   ├── 05-and-09
+│   │   │   └── README.md
+│   │   └── 05-and-11
+│   │       └── README.md
+│   ├── inframes_changed                // Mô hình với thay đổi phần tử bộ nhớ và cmd chạy
+│   │   ├── 03
+│   │   │   └── README.md
+│   │   └── 05
+│   │       └── README.md
+│   ├── msize_changed                   // Mô hình với khung hình đầu vào và cmd chạy
+│   │   ├── 09
+│   │   │   └── README.md
+│   │   └── 11
+│   │       └── README.md
+│   ├── papers                          // Mô hình gốc của bài báo và cmd chạy
+│   │   └── README.md
+│   ├── README.md
+│   └── SSIM
+│       └── README.md
+├── README.md
 ├── Train.py                            // Mô-đun huấn luyện mô hình
-└── utils.py
+├── TrainWithSSIMLoss.py
+├── utils.py
+└── video_capture                       // Mô-đun đọc khung hình và hỗ trợ chạy demo, đánh giá điểm ảnh
+    └── VideoCapture.py
 ```
 
 # 2. Yêu cầu về phần cứng, môi trường và thư viện liên quan
@@ -106,9 +143,16 @@ pip3 install tk # Windows: https://www.geeksforgeeks.org/how-to-install-tkinter-
 sudo apt-get install python-tk # Linux: https://www.geeksforgeeks.org/how-to-install-tkinter-on-linux/
 ```
 
+```bash
+# torchgeometry - Hỗ trợ tính toán cho hàm lỗi SSIM
+pip3 install torchgeometry
+```
+
 # 3. Huấn luyện, đánh giá mô hình và chạy mô phỏng
 
 ## a. Huấn luyện
+
+### Huấn luyện mặc định
 
 ### Các tham số:
 
@@ -132,7 +176,7 @@ sudo apt-get install python-tk # Linux: https://www.geeksforgeeks.org/how-to-ins
 -   `exp_dir`: Thư mục chứa đầu ra của mô hình đã huấn luyện, log trong quá trình huấn luyện, đánh giá `./exp`
     mặc định output của quá trình huấn luyện sẽ nằm ở thư mục `./exp/{dataset_type}/{method}/log`
 
-### Chạy huấn luyện mô hình:
+### Chạy huấn luyện mô hình mặc định
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -153,7 +197,30 @@ output mặc định sẽ được lưu ở thư mục
 
 -   Mô hình đã huấn luyện: `./exp/avenue/pred/avenue/log/avenue_prediction_model.pth`
 -   Phẩn tử bộ nhớ: `./exp/avenue/pred/log/avenue_prediction_keys.pt`
--   File log (các hàm lỗi): `./exp/avenue/pred/log/log.txt`
+-   File log (giá trị hàm lỗi qua từng epochs): `./exp/avenue/pred/log/log.txt`
+
+### Chạy huấn luyện mô hình với hàm lỗi SSIM
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 TrainWithSSIMLoss.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
+```
+
+Ví dụ để huấn luyện mô hình với hàm lỗi SSIM cho tập dữ liệu `avenue` và phương thức
+dự đoán khung hình `pred` ta chạy lệnh:
+
+```
+python3 TrainWithSSIMLoss.py --method pred --dataset_type avenue
+```
+
+Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên,
+output mặc định sẽ được lưu ở thư mục
+
+-   Mô hình đã huấn luyện: `./exp/avenue/pred/avenue/log/avenue_prediction_model.pth`
+-   Phẩn tử bộ nhớ: `./exp/avenue/pred/log/avenue_prediction_keys.pt`
+-   File log (giá trị hàm lỗi qua từng epochs): `./exp/avenue/pred/log/log.txt`
 
 ## b. Đánh giá
 
@@ -171,13 +238,28 @@ output mặc định sẽ được lưu ở thư mục
 -   `num_workers_test`: Số lượng workers trong quá trình tải dữ liệu đánh giá, mặc định là `1`
 -   `dataset_type`: Loại dataset dùng để huấn luyện (ped1, ped2, avenue), mặc định là `ped2`
 -   `dataset_path`: Thư mục chứa tập dữ liệu huấn luyện, đánh giá, mặc định là `./dataset`
--   `model_dir`: Đường dẫn tới file mô hình đã huấn luyện, mặc định là `./pre_trained_model/ped2_prediction_model.pth`
--   `m_items_dir`: Đường dẫn tới mô đun bọ nhớ đã huấn luyện, mặc định là `./pre_trained_model/ped2_prediction_keys.pt`
+-   `model_dir`: Đường dẫn tới file mô hình đã huấn luyện, mặc định là `./pre_trained_model/defaults/ped2_prediction_model.pth`
+-   `m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng đã huấn luyện, mặc định là `./pre_trained_model/defaults/ped2_prediction_keys.pt`
 -   `exp_dir`: Thư mục chứa đầu ra của mô hình đã huấn luyện, log trong quá trình huấn luyện, đánh giá `./exp`
     mặc định output của quá trình huấn luyện sẽ nằm ở thư mục `./exp/{dataset_type}/{method}/log`
--   `is_save_output`: Cờ đánh dấu có lưu output của khung hình trong quá trình huấn luyện hay không, mặc định là `true`
+-   `is_save_output`: Cờ đánh dấu có lưu output của khung hình trong quá trình đánh giá hay không, mặc định là `true`
+
+### Các tham số (trường hợp cải tiến đánh giá cho những khung hình đầu tiên):
+
+Thay đổi 2 tham số: `model_dir`, `m_items_dir` thành các tham số sau:
+
+-   `pred_model_dir`: Đường dẫn tới file mô hình dự đoán đã huấn luyện,
+    mặc định là `./pre_trained_model/defaults/ped2_prediction_model.pth`
+-   `pred_m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng với khung hình dự đoán đã huấn luyện,
+    mặc định là `./pre_trained_model/defaults/ped2_prediction_keys.pt`
+-   `recon_model_dir`: Đường dẫn tới file mô hình dự đoán đã huấn luyện,
+    mặc định là `./pre_trained_model/recon/ped2_reconstruction_model.pth`
+-   `recon_m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng với khung hình tái tạo đã huấn luyện,
+    mặc định là `./pre_trained_model/recon/ped2_reconstruction_keys.pt`
 
 ### Chạy đánh giá mô hình:
+
+#### Mặc định:
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -187,18 +269,48 @@ python3 Evaluate.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
 Ví dụ đánh giá mô hình với tập dữ liệu `avenue`, phương thức dự đoán khung hình `pred`,
-mô hình được lưu ở `./pre_trained_model/avenue_prediction_model.pth`, phần tử bộ nhớ được
-lưu ở `./pre_trained_model/avenue_prediction_keys.pt` ta chạy lệnh:
+mô hình được lưu ở `./pre_trained_model/defaults/avenue_prediction_model.pth`, phần tử bộ nhớ được
+lưu ở `./pre_trained_model/defaults/avenue_prediction_keys.pt` ta chạy lệnh:
 
 ```
-python3 Evaluate.py --method pred --dataset_type avenue --model_dir ./pre_trained_model/avenue_prediction_model.pth \
---m_items_dir ./pre_trained_model/avenue_prediction_keys.pt
+python3 Evaluate.py --method pred --dataset_type avenue --model_dir ./pre_trained_model/defaults/avenue_prediction_model.pth \
+--m_items_dir ./pre_trained_model/defaults/avenue_prediction_keys.pt
 ```
 
 Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên, output:
 
 -   Hiệu suất: In ra trên terminal chạy lệnh
 -   Khung hình dự đoán/tái tạo: mặc định được lưu ở `./dataset/avenue/output/frames`
+
+#### Với hàm lỗi SSIM:
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 EvaluateWithSSIMLoss.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
+```
+
+#### Đánh giá mô hình dự đoán với tất cả khung hình:
+
+Trường hợp này sẽ không bỏ sót những khung hình đầu tiên, thay vào đó sẽ dự đoán với tỉ lệ
+50% đúng và 50% sai
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
+```
+
+#### Đánh giá mô hình dự đoán với tất cả khung hình (kết hợp với mô hình tái tạo):
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
+```
 
 ## c. Chạy ứng dụng demo
 
@@ -227,7 +339,7 @@ python3 app.py --method pred --dataset_type avenue
 
 Hình ảnh khi chạy demo
 
-![image](./demo_images/1.png)
+![image](../demo_images/avenue_demo.png)
 
 # 4. Link github của khóa luận:
 

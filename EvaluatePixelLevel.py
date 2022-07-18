@@ -5,7 +5,7 @@ from image_similarity import ImageDifference as id
 from video_capture import VideoCapture as vc
 import numpy as np
 from utils import *
-from common import const
+from common import consts
 
 
 save_pixel_level_detected_frames = True
@@ -85,9 +85,9 @@ if measure_pixel_level_AUC == True:
     count_tn = 0
 
     len_labels = 0
-    if const.DEFAULT_DATASET_NAME == "avenue":
+    if consts.DEFAULT_DATASET_NAME == "avenue":
         len_labels = 15240
-    if const.DEFAULT_DATASET_NAME == "ped2":
+    if consts.DEFAULT_DATASET_NAME == "ped2":
         len_labels = 1962
 
     for i in range(len_labels):

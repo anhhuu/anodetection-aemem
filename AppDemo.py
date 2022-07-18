@@ -1,4 +1,4 @@
-from common import const
+from common import consts
 from video_capture import VideoCapture as vc
 import argparse
 import threading
@@ -25,7 +25,7 @@ def mini_frame_coord(window_H, window_W, frame_h, frame_w):
 
 
 class App:
-    def __init__(self, window, window_title, dataset_type=const.DEFAULT_DATASET_NAME, t_length=const.DEFAULT_T_LENGTH):
+    def __init__(self, window, window_title, dataset_type=consts.DEFAULT_DATASET_NAME, t_length=consts.DEFAULT_T_LENGTH):
         # create a window that contains everything on it
         self.window = window  # window = tk.Tk()
         self.window.iconbitmap()
@@ -127,7 +127,7 @@ class App:
             self.canvas.itemconfig(
                 self.anomaly_tag, fill='white', text="Abnormal: NO")
 
-        delay_time = const.DEFAULT_DELAY
+        delay_time = consts.DEFAULT_DELAY
 
         # SHOW BOUNDING BOX ON PED2 -- SHOW ANOMALY DETECT RESULT ON REMAINS
         if self.dataset_type == 'ped1':
@@ -229,7 +229,7 @@ class App:
         self.figure = plt.figure()
         self.ax = self.figure.add_subplot(111)
         # Set label for the figure
-        label = tk.Label(text="Anomaly Score Graph", font=const.LARGE_FONT)
+        label = tk.Label(text="Anomaly Score Graph", font=consts.LARGE_FONT)
         label.pack(pady=10, padx=10)
         self.ani = FuncAnimation(
             self.figure, self.static_animate, interval=1000)
