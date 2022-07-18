@@ -54,3 +54,22 @@ python3 EvaluateWithSSIMLoss.py \
 --model_dir ./pre_trained_model/ssim/ped2_prediction_model.pth \
 --m_items_dir ./pre_trained_model/ssim/ped2_prediction_keys.pt
 ```
+
+### PED2
+
+```
+python3 TrainWithSSIMLoss.py \
+--method pred  \
+--dataset_type avenue \
+--loss_compact 0.05 \
+--loss_separate 0.05 \
+--lr 15e5 \
+--epochs 100
+
+-----------------------------------------------------------------------------
+python3 EvaluateWithSSIMLoss.py \
+--method pred  \
+--dataset_type avenue \
+--model_dir ./pre_trained_model/ssim/avenue_prediction_epoch_60_model.pth \
+--m_items_dir ./pre_trained_model/ssim/avenue_prediction_epoch_60_keys.pt
+```

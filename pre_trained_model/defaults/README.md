@@ -41,8 +41,6 @@ python3 Evaluate.py \
 --dataset_type ped2 \
 --model_dir ./pre_trained_model/defaults/ped2_prediction_model.pth \
 --m_items_dir ./pre_trained_model/defaults/ped2_prediction_keys.pt
-
-
 ```
 
 ### AVENUE
