@@ -158,6 +158,12 @@ Ví dụ:
 -   File README.md trong thư mục `./fully_pred_anomal_score` sẽ chứa cmd chạy huấn luyện và đánh giá khi kết hợp mô hình tái tạo
     khung hình cho những khung hình đầu tiên
 
+Tiền xử lý:
+
+-   Cần copy thư mục chứa mô hình đã huấn luyện `pre_trained_model` vào thư mục gốc của khóa luận.
+-   Cần copy thư mục chứa tập dữ liệu `dataset` (bao gồm nhãn ở mức điểm ảnh do nhóm đã đánh lại) vào
+    thư mục gốc của khóa luận.
+
 ## 3.1. Huấn luyện
 
 ### 3.1.1. Các tham số:
