@@ -9,7 +9,7 @@ from torch import inverse
 
 class ImageDifference():
     def __init__(self) -> None:
-        print("")
+        pass
 
     def image_differences(self, test_image, predicted_image, pred_score, threshold):
         print("score: ", pred_score)
@@ -71,8 +71,10 @@ class ImageDifference():
                 if w < 17 or h < 17:
                     continue
 
-                cv2.rectangle(test_clone, (x, y),(x + w, y + h), (255, 0, 0), 2)
-                cv2.rectangle(pred_clone, (x, y),(x + w, y + h), (255, 0, 0), 2)
+                cv2.rectangle(test_clone, (x, y),
+                              (x + w, y + h), (255, 0, 0), 2)
+                cv2.rectangle(pred_clone, (x, y),
+                              (x + w, y + h), (255, 0, 0), 2)
 
             return test_clone, pred_clone, complete_process_img, diff, SSIM_score
         else:

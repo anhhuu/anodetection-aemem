@@ -150,6 +150,14 @@ pip3 install torchgeometry
 
 # 3. Huấn luyện, đánh giá mô hình và chạy mô phỏng
 
+Trong mỗi file lưu mô hình đều có lệnh để chạy huấn luyện/đánh giá tương ứng.
+Ví dụ:
+
+-   File README.md trong thư mục `./pre_trained_model/inframes-and-msize_changed/03-and-09` sẽ chứa cmd chạy huấn luyện và đánh giá
+    cho mô hình có điều chỉnh về phần tử bộ nhớ và khung hình đầu vào tương ứng là 9 và 3
+-   File README.md trong thư mục `./fully_pred_anomal_score` sẽ chứa cmd chạy huấn luyện và đánh giá khi kết hợp mô hình tái tạo
+    khung hình cho những khung hình đầu tiên
+
 ## 3.1. Huấn luyện
 
 ### 3.1.1. Các tham số:
@@ -284,7 +292,7 @@ Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham 
 
 #### 3.2.3.2. Đánh giá mô hình với hàm lỗi SSIM:
 
-Lưu ý: Mô hình phải được huấn luyện với hàm lỗi SSIM
+**Lưu ý:** Mô hình phải được huấn luyện với hàm lỗi SSIM
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -314,6 +322,37 @@ python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
+#### 3.2.3.5. Đánh giá mô hình dự đoán với tất cả khung hình ở mức điểm ảnh:
+
+**Lưu ý:** Trước khi đánh giá mô hình ở mức điểm ảnh, cần cắc chắn rằng:
+
+-   Mô hình sử dụng là mô hình với tham số mặc định
+-   Có output của các khung hình dự đoán
+-   Có ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
+
+#### a. Lấy output của khung hình dự đoán
+
+Bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
+trước khi chạy lưu khung hình dự đoán)
+
+#### b. Lấy ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 EvaluatePixelLevel.py --type_run export_diff --dataset_type ped2 # Lấy cho ped2
+```
+
+#### c. Đánh giá
+
+-   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
+-   Chạy lệnh:
+
+```
+python3 EvaluatePixelLevel.py --type_run evaluate --dataset_type ped2 # Đánh giá cho ped2
+```
+
 ## 3.3. Chạy ứng dụng demo
 
 ### 3.3.1. Các tham số:
@@ -323,7 +362,9 @@ python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 
 ### 3.3.1. Cách chạy demo:
 
-#### Lưu ý: Cần phải có output khung hình của quá trình đánh giá trước khi chạy demo
+**Lưu ý:** Cần phải có output khung hình của quá trình đánh giá trước khi chạy demo, để có được
+khung hình này, tiến hành bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
+trước khi chạy lưu khung hình dự đoán và mô hình dự đoán nên sử dụng là mô hình có tham số mặc định)
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:

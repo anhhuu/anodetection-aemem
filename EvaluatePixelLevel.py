@@ -6,10 +6,19 @@ from video_capture import VideoCapture as vc
 import numpy as np
 from utils import *
 from common import consts
+import argparse
 
+parser = argparse.ArgumentParser(description="anomaly detection using aemem")
+parser.add_argument('--type_run', type=str, default="evaluate",
+                    help='type of running: evaluate, export_diff')
+parser.add_argument('--dataset_type', type=str, default='ped2',
+                    help='type of dataset: ped1, ped2, avenue')
 
-save_pixel_level_detected_frames = True
-measure_pixel_level_AUC = not save_pixel_level_detected_frames
+args = parser.parse_args()
+
+measure_pixel_level_AUC = False
+if args.type_run == "evaluate":
+    measure_pixel_level_AUC = True
 
 
 def create_detected_pixelLevel_frame(test, predicted, anomaly_score, optimal_threshold):
@@ -21,7 +30,10 @@ def create_detected_pixelLevel_frame(test, predicted, anomaly_score, optimal_thr
     # ID.compare_image_diff(pixel_label_frame, thresholded_img)
 
 
-DATA = vc.VideoCapture()
+current_data_path = ['./dataset/' + args.dataset_type + '/', ]
+
+DATA = vc.VideoCapture(data_path=current_data_path,
+                       dataset_type=args.dataset_type)
 ID = id.ImageDifference()
 optimal_threshold = DATA.opt_threshold[0]
 output_frames_dir = './dataset/' + DATA.dataset_type + '/output/detected_regions'
@@ -31,25 +43,8 @@ is_exist = os.path.exists(output_frames_dir)
 if not is_exist:
     os.makedirs(output_frames_dir)
 
-if save_pixel_level_detected_frames == True:
-    for i in range(len(DATA.vid[1])):
-        # Get a frame from the video source
-        print("Frame th: ", i)
-        test_frame, predicted_frame, anomaly_score, pixel_label_frame = DATA.get_static_frame_for_export_label(
-            i)
-        create_detected_pixelLevel_frame(
-            test_frame, predicted_frame, anomaly_score, optimal_threshold)
-
-        # PIXEL LEVEL
-        test_img_detected, pred_img_detected, complete_process_img, SSIM_diff_img, SSIM_score = ID.image_differences(
-            test_frame, predicted_frame, anomaly_score, DATA.opt_threshold)
-
-        img_name_dir = ""
-        img_name_dir = output_frames_dir + "/%04d.jpg" % i
-
-        cv2.imwrite(img_name_dir, complete_process_img)
-
 IoU_score_list = []
+
 if measure_pixel_level_AUC == True:
     labels_list = []
     for i in range(len(DATA.vid[1])):
@@ -98,3 +93,20 @@ if measure_pixel_level_AUC == True:
 
     accuracy = (count_tp + count_tn)/len_labels
     print('accuracy:', accuracy*100, '%')
+else:
+    for i in range(len(DATA.vid[1])):
+        # Get a frame from the video source
+        print("Frame th: ", i)
+        test_frame, predicted_frame, anomaly_score, pixel_label_frame = DATA.get_static_frame_for_export_label(
+            i)
+        create_detected_pixelLevel_frame(
+            test_frame, predicted_frame, anomaly_score, optimal_threshold)
+
+        # PIXEL LEVEL
+        test_img_detected, pred_img_detected, complete_process_img, SSIM_diff_img, SSIM_score = ID.image_differences(
+            test_frame, predicted_frame, anomaly_score, DATA.opt_threshold)
+
+        img_name_dir = ""
+        img_name_dir = output_frames_dir + "/%04d.jpg" % i
+
+        cv2.imwrite(img_name_dir, complete_process_img)

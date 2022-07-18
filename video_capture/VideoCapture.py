@@ -4,11 +4,11 @@ import numpy as np
 import imutils
 from utils import *
 
-from common import const
+from common import consts
 
 
 class VideoCapture:
-    def __init__(self, data_path=const.DEFAULT_DATASET_PATH, dataset_type=const.DEFAULT_DATASET_NAME, frame_sequence_length=const.DEFAULT_FRAME_PRED_INPUT):
+    def __init__(self, data_path=consts.DEFAULT_DATASET_PATH, dataset_type=consts.DEFAULT_DATASET_NAME, frame_sequence_length=consts.DEFAULT_FRAME_PRED_INPUT):
         self.data_path = data_path
         self.dataset_type = dataset_type
         self.frame_sequence_length = frame_sequence_length
