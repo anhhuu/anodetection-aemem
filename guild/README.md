@@ -2,7 +2,7 @@
 
 # 1. Cấu trúc thư mục
 
-```c++
+```
 .
 ├── AppDemo.py                          // Ứng dụng demo
 ├── common                              // Hằng số của ứng dụng demo
@@ -150,11 +150,9 @@ pip3 install torchgeometry
 
 # 3. Huấn luyện, đánh giá mô hình và chạy mô phỏng
 
-## a. Huấn luyện
+## 3.1. Huấn luyện
 
-### Huấn luyện mặc định
-
-### Các tham số:
+### 3.1.1. Các tham số:
 
 -   `gpus`: Số GPU dùng để huấn luyện
 -   `batch_size`: batch size trong quá trình huấn luyện, mặc định là `4`
@@ -176,7 +174,9 @@ pip3 install torchgeometry
 -   `exp_dir`: Thư mục chứa đầu ra của mô hình đã huấn luyện, log trong quá trình huấn luyện, đánh giá `./exp`
     mặc định output của quá trình huấn luyện sẽ nằm ở thư mục `./exp/{dataset_type}/{method}/log`
 
-### Chạy huấn luyện mô hình mặc định
+### 3.1.2. Chạy huấn luyện mô hình:
+
+#### 3.1.2.1. Chạy huấn luyện mô hình mặc định
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -199,7 +199,7 @@ output mặc định sẽ được lưu ở thư mục
 -   Phẩn tử bộ nhớ: `./exp/avenue/pred/log/avenue_prediction_keys.pt`
 -   File log (giá trị hàm lỗi qua từng epochs): `./exp/avenue/pred/log/log.txt`
 
-### Chạy huấn luyện mô hình với hàm lỗi SSIM
+#### 3.1.2.2. Chạy huấn luyện mô hình với hàm lỗi SSIM
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -222,9 +222,9 @@ output mặc định sẽ được lưu ở thư mục
 -   Phẩn tử bộ nhớ: `./exp/avenue/pred/log/avenue_prediction_keys.pt`
 -   File log (giá trị hàm lỗi qua từng epochs): `./exp/avenue/pred/log/log.txt`
 
-## b. Đánh giá
+## 3.2. Đánh giá
 
-### Các tham số:
+### 3.2.1. Các tham số:
 
 -   `gpus`: Số GPU dùng để chạy đánh giá mô hình
 -   `batch_size_test`: batch size trong quá trình đánh giá, mặc định là `1`
@@ -244,7 +244,7 @@ output mặc định sẽ được lưu ở thư mục
     mặc định output của quá trình huấn luyện sẽ nằm ở thư mục `./exp/{dataset_type}/{method}/log`
 -   `is_save_output`: Cờ đánh dấu có lưu output của khung hình trong quá trình đánh giá hay không, mặc định là `true`
 
-### Các tham số (trường hợp cải tiến đánh giá cho những khung hình đầu tiên):
+### 3.2.2. Các tham số (trường hợp cải tiến đánh giá cho những khung hình đầu tiên):
 
 Thay đổi 2 tham số: `model_dir`, `m_items_dir` thành các tham số sau:
 
@@ -257,9 +257,9 @@ Thay đổi 2 tham số: `model_dir`, `m_items_dir` thành các tham số sau:
 -   `recon_m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng với khung hình tái tạo đã huấn luyện,
     mặc định là `./pre_trained_model/recon/ped2_reconstruction_keys.pt`
 
-### Chạy đánh giá mô hình:
+### 3.2.3. Chạy đánh giá mô hình:
 
-#### Mặc định:
+#### 3.2.3.1. Mặc định:
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -282,7 +282,9 @@ Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham 
 -   Hiệu suất: In ra trên terminal chạy lệnh
 -   Khung hình dự đoán/tái tạo: mặc định được lưu ở `./dataset/avenue/output/frames`
 
-#### Với hàm lỗi SSIM:
+#### 3.2.3.2. Đánh giá mô hình với hàm lỗi SSIM:
+
+Lưu ý: Mô hình phải được huấn luyện với hàm lỗi SSIM
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -291,7 +293,7 @@ Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham 
 python3 EvaluateWithSSIMLoss.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-#### Đánh giá mô hình dự đoán với tất cả khung hình:
+#### 3.2.3.3. Đánh giá mô hình dự đoán với tất cả khung hình:
 
 Trường hợp này sẽ không bỏ sót những khung hình đầu tiên, thay vào đó sẽ dự đoán với tỉ lệ
 50% đúng và 50% sai
@@ -303,7 +305,7 @@ Trường hợp này sẽ không bỏ sót những khung hình đầu tiên, tha
 python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-#### Đánh giá mô hình dự đoán với tất cả khung hình (kết hợp với mô hình tái tạo):
+#### 3.2.3.4. Đánh giá mô hình dự đoán với tất cả khung hình (kết hợp với mô hình tái tạo):
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -312,15 +314,14 @@ python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-## c. Chạy ứng dụng demo
+## 3.3. Chạy ứng dụng demo
 
-### Các tham số:
+### 3.3.1. Các tham số:
 
--   `method`: Phương thức chạy demo (tái tạo/dự đoán) mặc định là dự đoán khung hình `pred`
 -   `t_length`: Chiều dài chuỗi khung hình đầu vào của mô hình, mặc định là `5`
 -   `dataset_type`: Loại dataset dùng để chạy demo (ped1, ped2, avenue), mặc định là `ped2`
 
-### Cách chạy demo:
+### 3.3.1. Cách chạy demo:
 
 #### Lưu ý: Cần phải có output khung hình của quá trình đánh giá trước khi chạy demo
 
@@ -328,13 +329,13 @@ python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 -   Chạy lệnh:
 
 ```
-python3 app.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
+python3 AppDemo.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
 Ví dụ để chạy demo cho tập dữ liệu `ped2`, phương thức dự đoán khung hình `pred` và các tham số còn lại mặc định, ta chạy lệnh:
 
 ```
-python3 app.py --method pred --dataset_type avenue
+python3 AppDemo.py --dataset_type avenue
 ```
 
 Hình ảnh khi chạy demo
