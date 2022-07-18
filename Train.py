@@ -42,7 +42,7 @@ parser.add_argument('--msize', type=int, default=10,
 parser.add_argument('--num_workers', type=int, default=2,
                     help='number of workers for the train loader')
 parser.add_argument('--dataset_type', type=str, default='ped2',
-                    help='type of dataset: ped1, ped2, avenue, shanghai')
+                    help='type of dataset: ped1, ped2, avenue')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--exp_dir', type=str, default='log',

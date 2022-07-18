@@ -37,7 +37,7 @@ parser.add_argument('--recon_th', type=float, default=0.015,
 parser.add_argument('--num_workers_test', type=int, default=1,
                     help='number of workers for the test loader')
 parser.add_argument('--dataset_type', type=str, default='ped2',
-                    help='type of dataset: ped1, ped2, avenue, shanghai')
+                    help='type of dataset: ped1, ped2, avenue')
 parser.add_argument('--dataset_path', type=str,
                     default='./dataset', help='directory of data')
 parser.add_argument('--pred_model_dir', type=str,
@@ -132,8 +132,6 @@ elif "ped2" in args.pred_model_dir:
     trained_model_using = "ped2"
 elif "avenue" in args.pred_model_dir:
     trained_model_using = "avenue"
-elif "shanghai" in args.pred_model_dir:
-    trained_model_using = "shanghai"
 
 print('Start Evaluation of:', args.dataset_type + ',',
       'method: recon+pred,', 'trained model used:', trained_model_using)

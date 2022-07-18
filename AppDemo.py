@@ -1,27 +1,19 @@
+from common import const
+from video_capture import VideoCapture as vc
 import argparse
 import threading
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 
 from matplotlib.animation import FuncAnimation
 import tkinter as tk
-import os
 import cv2
 from image_similarity import ImageDifference as id
 import numpy as np
 from PIL import ImageTk, Image
 import time
 import matplotlib.pyplot as plt
-from tkinter import filedialog
 import matplotlib
 matplotlib.use("TkAgg")
-
-LARGE_FONT = ("Verdana", 12)
-
-DEFAULT_DATASET_NAME = "ped2"
-DEFAULT_METHOD = "pred"
-DEFAULT_FRAME_PRED_INPUT = 4
-DEFAULT_T_LENGTH = 5
-DEFAULT_DELAY = 15
 
 
 def mini_frame_coord(window_H, window_W, frame_h, frame_w):
@@ -33,23 +25,21 @@ def mini_frame_coord(window_H, window_W, frame_h, frame_w):
 
 
 class App:
-    def __init__(self, window, window_title, dataset_type=DEFAULT_DATASET_NAME, method=DEFAULT_METHOD, t_length=DEFAULT_T_LENGTH):
+    def __init__(self, window, window_title, dataset_type=const.DEFAULT_DATASET_NAME, t_length=const.DEFAULT_T_LENGTH):
         # create a window that contains everything on it
         self.window = window  # window = tk.Tk()
         self.window.iconbitmap()
         # set title for window
         self.window.wm_title("Anomaly Detection Application")
         self.dataset_type = dataset_type
-        self.method = method
 
         # create canvas to show widget
         self.set_up_canvas()
 
-        # create button for file loading process
-        self.setup_buttons()
+        self.current_data_path = ['./dataset/' + self.dataset_type + '/', ]
 
         # create a video source (by default this will try to open the computer webcam)
-        self.vid = VideoCapture(
+        self.vid = vc.VideoCapture(
             self.current_data_path, self.dataset_type,  frame_sequence_length=t_length-1)
         self.numPredFrame = len(self.vid.vid[1])
 
@@ -108,25 +98,10 @@ class App:
             self.canvas.create_text(self.frame_4_x_axis, 10, fill="white",
                                     font='Helvatica 20 bold', text="Anomaly Detection", anchor=tk.NW)
 
-    def change_dataset(self):
-        folder_path = filedialog.askdirectory()
-        self.current_data_path.append(folder_path)
-        current_dataset_name = folder_path.split('/')[-1]
-        self.canvas.itemconfig(self.dataset_name_tag, fill='white',
-                               text="Dataset: {}".format(current_dataset_name))
-
-    def setup_buttons(self):
-        self.current_data_path = ['./dataset/' + self.dataset_type + '/', ]
-        # Button that lets the user take a snapshot
-        self.open_dataset = tk.Button(self.window, text="Open Dataset", width=50, command=self.change_dataset,
-                                      fg='white', bg="#263D42")
-        self.open_dataset.pack(anchor=tk.CENTER, expand=True)
-
     def static_update(self):
         # Get a frame from the video source
-        test_frame, predicted_frame, anomaly_score = self.vid.get_static_frame(
+        test_frame, predicted_frame, anomaly_score = self.vid.get_static_frame_for_app(
             self.iter_frame)
-        #test_frame, predicted_frame, anomaly_score, pixel_label_frame = self.vid.get_static_frame(self.iter_frame)
 
         optimal_threshold = self.vid.opt_threshold
         # Calculate difference image
@@ -152,7 +127,7 @@ class App:
             self.canvas.itemconfig(
                 self.anomaly_tag, fill='white', text="Abnormal: NO")
 
-        delay_time = DEFAULT_DELAY
+        delay_time = const.DEFAULT_DELAY
 
         # SHOW BOUNDING BOX ON PED2 -- SHOW ANOMALY DETECT RESULT ON REMAINS
         if self.dataset_type == 'ped1':
@@ -254,7 +229,7 @@ class App:
         self.figure = plt.figure()
         self.ax = self.figure.add_subplot(111)
         # Set label for the figure
-        label = tk.Label(text="Anomaly Score Graph", font=LARGE_FONT)
+        label = tk.Label(text="Anomaly Score Graph", font=const.LARGE_FONT)
         label.pack(pady=10, padx=10)
         self.ani = FuncAnimation(
             self.figure, self.static_animate, interval=1000)
@@ -272,157 +247,13 @@ class App:
         plt.close()
 
 
-class VideoCapture:
-    def __init__(self, data_path=[], dataset_type=DEFAULT_DATASET_NAME, frame_sequence_length=DEFAULT_FRAME_PRED_INPUT):
-        self.data_path = data_path
-        self.dataset_type = dataset_type
-        self.frame_sequence_length = frame_sequence_length
-        # Open the video source, # capture video by webcam by default
-
-        # load test and predicted frames
-        test_frames, predicted_framese, test_num_video_index = self.get_dataset_frames()
-        self.vid = [test_frames, predicted_framese, test_num_video_index]
-
-        # FRAME-LEVEL data
-        self.frame_scores = np.load(
-            self.data_path[-1] + 'output/anomaly_score.npy')
-        self.labels = np.load(
-            './data_labels/frame_labels_' + self.dataset_type + '.npy')
-        self.opt_threshold = np.load(
-            self.data_path[-1] + 'output/optimal_threshold.npy')
-
-        # PIXEL-LEVEL data
-        self.pixelLabels = self.load_pixelLabel_frames()
-        self.pixel_detected_frames = self.load_pixel_detected_frames()
-
-    def get_static_frame(self, iter_frame):
-        test_video_index = self.vid[2]
-
-        # load the two input images
-        i = iter_frame
-
-        test_frame_list = self.vid[0]
-        # Get predicted frame
-        pred_frame_list = self.vid[1]
-        current_pred_frame = pred_frame_list[i]
-
-        # Get ground-truth frame
-        map_index = test_video_index[i]
-        true_index_of_test_frame = i + self.frame_sequence_length * \
-            test_video_index[i+map_index*4]
-        current_test_frame = test_frame_list[true_index_of_test_frame]
-
-        # resize image
-        w1, _, _ = current_test_frame.shape
-        w2, _, _ = current_pred_frame.shape
-        if w1 != 256:
-            current_test_frame = cv2.resize(current_test_frame, (256, 256))
-        if w2 != 256:
-            current_pred_frame = cv2.resize(current_pred_frame, (256, 256))
-
-        anomaly_score = self.frame_scores[i]
-        # , pixel_level_label#, pixel_detected_frame
-        return current_test_frame, current_pred_frame, anomaly_score
-
-    def get_dataset_frames(self):
-        test_input_path = []
-        test_video_dir = []
-        test_video_dir_distinct = []
-        for path, _, files in os.walk(self.data_path[-1] + 'testing/frames'):
-            for name in files:
-                if(path not in test_video_dir_distinct):
-                    test_video_dir_distinct.append(path)
-                test_input_path.append(os.path.join(path, name))
-                test_video_dir.append(path)
-        test_input_path.sort()
-        test_video_dir.sort()
-        test_video_dir_distinct.sort()
-
-        test_video_dir_distinct_map_index = {}
-        for i in range(len(test_video_dir_distinct)):
-            test_video_dir_distinct_map_index[test_video_dir_distinct[i]] = i + 1
-
-        for i in range(len(test_video_dir)):
-            test_video_dir[i] = test_video_dir_distinct_map_index[test_video_dir[i]]
-
-        pred_input_path = []
-        for path, _, files in os.walk(self.data_path[-1] + 'output/frames'):
-            for name in files:
-                pred_input_path.append(os.path.join(path, name))
-        pred_input_path.sort()
-
-        test_input_imgs = []
-        for i in range(len(test_input_path)):
-            img = cv2.imread(test_input_path[i])
-            test_input_imgs.append(img)
-
-        pred_input_imgs = []
-        for i in range(len(pred_input_path)):
-            img = cv2.imread(pred_input_path[i])
-            pred_input_imgs.append(img)
-
-        return test_input_imgs, pred_input_imgs, test_video_dir
-
-    def load_pixelLabel_frames(self):
-        label_input_path = []
-        label_dir = []
-        label_dir_distinct = []
-        cur_path = './dataset/' + self.dataset_type + '/testing/labels'
-        for path, _, files in os.walk(cur_path):
-            for name in files:
-                if(path not in label_dir_distinct):
-                    label_dir_distinct.append(path)
-                label_input_path.append(os.path.join(path, name))
-                label_dir.append(path)
-        label_input_path.sort()
-        label_dir.sort()
-        label_dir_distinct.sort()
-
-        label_list = []
-        for i in range(len(label_input_path)):
-            label_img = cv2.imread(label_input_path[i])
-            label_img.astype("uint8")
-            label_img = cv2.resize(label_img, (256, 256))
-            label_img = cv2.cvtColor(label_img, cv2.COLOR_BGR2GRAY)
-            label_list.append(label_img)
-
-        return label_list
-
-    def load_pixel_detected_frames(self):
-        input_path = []
-        directory = []
-        dir_distinct = []
-        current_path = './dataset/' + self.dataset_type + '/output/detected_regions'
-        for path, _, files in os.walk(current_path):
-            for name in files:
-                if(path not in dir_distinct):
-                    dir_distinct.append(path)
-                input_path.append(os.path.join(path, name))
-                directory.append(path)
-        input_path.sort()
-        directory.sort()
-        dir_distinct.sort()
-
-        pixel_detected_frames = []
-        for i in range(len(input_path)):
-            detected_img = cv2.imread(input_path[i])
-            detected_img.astype("uint8")
-            detected_img = cv2.resize(detected_img, (256, 256))
-            detected_img = cv2.cvtColor(detected_img, cv2.COLOR_BGR2GRAY)
-            pixel_detected_frames.append(detected_img)
-
-        return pixel_detected_frames
-
-
 # Create a window and pass it to the Application object
 parser = argparse.ArgumentParser(description="anomaly detection using aemem")
-parser.add_argument('--method', type=str, default='pred',
-                    help='The target task for anoamly detection')
 parser.add_argument('--t_length', type=int, default=5,
                     help='length of the frame sequences')
-parser.add_argument('--dataset_type', type=str, default='avenue',
-                    help='type of dataset: ped1, ped2, avenue, shanghai')
+parser.add_argument('--dataset_type', type=str, default='ped2',
+                    help='type of dataset: ped1, ped2, avenue')
 
 args = parser.parse_args()
-App(tk.Tk(), "Tkinter and OpenCV", dataset_type=args.dataset_type,
-    method=args.method, t_length=args.t_length)
+App(tk.Tk(), "Tkinter and OpenCV",
+    dataset_type=args.dataset_type, t_length=args.t_length)
