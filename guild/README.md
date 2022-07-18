@@ -87,6 +87,8 @@
 
 # 2. Yêu cầu về phần cứng, môi trường và thư viện liên quan
 
+**Khóa luận chạy tốt nhất trên hệ điều hành Linux (Ubuntu 20.04)**
+
 -   Hệ điều hành: Windows 10, Linux (Ubuntu 20.04)
 -   Card đồ họa rời, có hỗ trợ CUDA
 -   Python: phiên bản `Python 3.8.10`, link cài đặt (https://www.python.org/downloads/release/python-3810)
