@@ -330,12 +330,12 @@ python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 -   Có output của các khung hình dự đoán
 -   Có ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
 
-#### a. Lấy output của khung hình dự đoán
+##### a. Lấy output của khung hình dự đoán
 
 Bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
 trước khi chạy lưu khung hình dự đoán)
 
-#### b. Lấy ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
+##### b. Lấy ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -344,7 +344,7 @@ trước khi chạy lưu khung hình dự đoán)
 python3 EvaluatePixelLevel.py --type_run export_diff --dataset_type ped2 # Lấy cho ped2
 ```
 
-#### c. Đánh giá
+##### c. Đánh giá
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
