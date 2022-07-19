@@ -27,7 +27,7 @@ def mini_frame_coord(window_H, window_W, frame_h, frame_w):
 class App:
     def __init__(self, window, window_title, dataset_type=consts.DEFAULT_DATASET_NAME, t_length=consts.DEFAULT_T_LENGTH):
         # create a window that contains everything on it
-        self.window = window  # window = tk.Tk()
+        self.window = window
         self.window.iconbitmap()
         # set title for window
         self.window.wm_title("Anomaly Detection Application")
