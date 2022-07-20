@@ -2,7 +2,13 @@
 
 ![image](./demo_images/avenue_demo.png)
 
-Anomaly detection using autoencoder and memory module.
+Abnormal events detection using autoencoder (U-Net) and memory module.
+
+## Demo
+
+-   [[PED1]](https://youtu.be/LHS30qyfB9M)
+-   [[PED2]](https://youtu.be/VOdZ9VEGnrA)
+-   [[Avenue]](https://youtu.be/YmsGYJg_HVw)
 
 ## Dataset
 
