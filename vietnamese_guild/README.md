@@ -348,15 +348,15 @@ Cách huấn luyện tương tự như mục `3.1.2.1.` ở trên, tuy nhiên th
 python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-Ví dụ cho `avenue`:
+Ví dụ cho `ped2`:
 
 ```
 python3 EvaluateCombine.py \
---dataset_type avenue \
---pred_model_dir ./pre_trained_model/defaults/avenue_prediction_model.pth \
---pred_m_items_dir ./pre_trained_model/defaults/avenue_prediction_keys.pt \
---recon_model_dir ./pre_trained_model/recon/avenue_reconstruction_model.pth \
---recon_m_items_dir ./pre_trained_model/recon/avenue_reconstruction_keys.pt
+--dataset_type ped2 \
+--pred_model_dir ./pre_trained_model/defaults/ped2_prediction_model.pth \
+--pred_m_items_dir ./pre_trained_model/defaults/ped2_prediction_keys.pt \
+--recon_model_dir ./pre_trained_model/recon/ped2_reconstruction_model.pth \
+--recon_m_items_dir ./pre_trained_model/recon/ped2_reconstruction_keys.pt
 ```
 
 #### 3.2.3.5. Đánh giá mô hình dự đoán với tất cả khung hình ở mức điểm ảnh:
@@ -378,8 +378,11 @@ trước khi chạy lưu khung hình dự đoán)
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
 
+Ví dụ:
+
 ```
-python3 EvaluatePixelLevel.py --type_run export_diff --dataset_type ped2 # Lấy cho ped2
+# Lấy cho ped2
+python3 EvaluatePixelLevel.py --type_run export_diff --dataset_type ped2
 ```
 
 ##### c. Đánh giá
@@ -387,8 +390,11 @@ python3 EvaluatePixelLevel.py --type_run export_diff --dataset_type ped2 # Lấy
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
 
+Ví dụ:
+
 ```
-python3 EvaluatePixelLevel.py --type_run evaluate --dataset_type ped2 # Đánh giá cho ped2
+# Đánh giá cho ped2
+python3 EvaluatePixelLevel.py --type_run evaluate --dataset_type ped2
 ```
 
 ## 3.3. Chạy ứng dụng demo
@@ -422,7 +428,7 @@ Ví dụ để chạy demo cho tập dữ liệu `ped2`, phương thức dự đ
 python3 AppDemo.py --dataset_type avenue
 ```
 
-Hình ảnh khi chạy demo
+Hình ảnh khi chạy demo:
 
 ![image](https://raw.githubusercontent.com/anhhuu/anodetection-aemem/master/demo_images/avenue_demo.png)
 
