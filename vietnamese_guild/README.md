@@ -424,7 +424,7 @@ python3 AppDemo.py --dataset_type avenue
 
 Hình ảnh khi chạy demo
 
-![image](../demo_images/avenue_demo.png)
+![image](https://raw.githubusercontent.com/anhhuu/anodetection-aemem/master/demo_images/avenue_demo.png)
 
 # 4. Link github của khóa luận:
 
