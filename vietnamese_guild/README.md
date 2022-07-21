@@ -155,10 +155,10 @@ pip3 install torchgeometry
 Trong mỗi file lưu mô hình đều có lệnh để chạy huấn luyện/đánh giá tương ứng.
 Ví dụ:
 
--   File README.md trong thư mục `./pre_trained_model/inframes-and-msize_changed/03-and-09` sẽ chứa cmd chạy huấn luyện và đánh giá
-    cho mô hình có điều chỉnh về phần tử bộ nhớ và khung hình đầu vào tương ứng là 9 và 3
--   File README.md trong thư mục `./fully_pred_anomal_score` sẽ chứa cmd chạy huấn luyện và đánh giá khi kết hợp mô hình tái tạo
-    khung hình cho những khung hình đầu tiên
+-   File README.md trong thư mục `./pre_trained_model/inframes-and-msize_changed/03-and-09` sẽ chứa các lệnh (commands)
+    chạy huấn luyện và đánh giá cho mô hình có điều chỉnh về phần tử bộ nhớ và khung hình đầu vào tương ứng là 9 và 3
+-   File README.md trong thư mục `./fully_pred_anomal_score` sẽ chứa các lệnh (commands) chạy huấn luyện và đánh giá
+    khi kết hợp mô hình tái tạo khung hình cho những khung hình đầu tiên
 
 Tiền xử lý:
 
@@ -192,7 +192,7 @@ Tiền xử lý:
 
 ### 3.1.2. Chạy huấn luyện mô hình:
 
-#### 3.1.2.1. Chạy huấn luyện mô hình mặc định
+#### 3.1.2.1. Chạy huấn luyện mô hình mặc định, thay đổi phần tử bộ nhớ, khung hình đầu vào
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -201,11 +201,13 @@ Tiền xử lý:
 python3 Train.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
-Ví dụ để huấn luyện mô hình cho tập dữ liệu `avenue` và phương thức
-dự đoán khung hình `pred` ta chạy lệnh:
+Các tham số có thể điều chỉnh theo thay đổi mong muốn
+
+Ví dụ để huấn luyện mô hình cho tập dữ liệu `avenue`, phương thức dự đoán khung hình `pred`,
+10 phần tử bộ nhớ và 5 khung hình đầu (4 khung hình để dự đoán khung hình cuối) vào ta chạy lệnh:
 
 ```
-python3 Train.py --method pred --dataset_type avenue
+python3 Train.py --dataset_type avenue --method pred --t_length 5 --msize 10
 ```
 
 Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên,
@@ -258,9 +260,11 @@ output mặc định sẽ được lưu ở thư mục
 -   `m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng đã huấn luyện, mặc định là `./pre_trained_model/defaults/ped2_prediction_keys.pt`
 -   `exp_dir`: Thư mục chứa đầu ra của mô hình đã huấn luyện, log trong quá trình huấn luyện, đánh giá `./exp`
     mặc định output của quá trình huấn luyện sẽ nằm ở thư mục `./exp/{dataset_type}/{method}/log`
--   `is_save_output`: Cờ đánh dấu có lưu output của khung hình trong quá trình đánh giá hay không, mặc định là `true`
+-   `is_save_output`: Cờ đánh dấu có lưu output của khung hình trong quá trình đánh giá hay không, mặc định là `false`
 
-### 3.2.2. Các tham số (trường hợp cải tiến đánh giá cho những khung hình đầu tiên):
+### 3.2.2. Các tham số khác:
+
+#### 3.2.2.1. Trường hợp cải tiến đánh giá cho những khung hình đầu tiên
 
 Thay đổi 2 tham số: `model_dir`, `m_items_dir` thành các tham số sau:
 
@@ -272,6 +276,11 @@ Thay đổi 2 tham số: `model_dir`, `m_items_dir` thành các tham số sau:
     mặc định là `./pre_trained_model/recon/ped2_reconstruction_model.pth`
 -   `recon_m_items_dir`: Đường dẫn tới bộ nhớ lưu trữ đặc trưng với khung hình tái tạo đã huấn luyện,
     mặc định là `./pre_trained_model/recon/ped2_reconstruction_keys.pt`
+
+#### 3.2.2.2. Trường hợp cải tiến đánh giá ở mức điểm ảnh
+
+-   `type_run`: Với tham số này có 2 giá trị `evaluate` và `export_diff`, lần lượt mang ý nghĩa là đánh giá mô hình và
+    xuất file ảnh dị biệt.
 
 ### 3.2.3. Chạy đánh giá mô hình:
 
@@ -289,14 +298,17 @@ mô hình được lưu ở `./pre_trained_model/defaults/avenue_prediction_mode
 lưu ở `./pre_trained_model/defaults/avenue_prediction_keys.pt` ta chạy lệnh:
 
 ```
-python3 Evaluate.py --method pred --dataset_type avenue --model_dir ./pre_trained_model/defaults/avenue_prediction_model.pth \
+python3 Evaluate.py --method pred \
+--dataset_type avenue \
+--model_dir ./pre_trained_model/defaults/avenue_prediction_model.pth \
 --m_items_dir ./pre_trained_model/defaults/avenue_prediction_keys.pt
 ```
 
 Sau khi chạy xong lệnh trên cho tập dữ liệu `avenue` với các tham số tương ứng trên, output:
 
 -   Hiệu suất: In ra trên terminal chạy lệnh
--   Khung hình dự đoán/tái tạo: mặc định được lưu ở `./dataset/avenue/output/frames`
+-   Khung hình dự đoán/tái tạo: mặc định được lưu ở `./dataset/avenue/output/frames` (trường hợp bật cờ `is_save_output` -
+    mang giá trị `true`)
 
 #### 3.2.3.2. Đánh giá mô hình với hàm lỗi SSIM:
 
@@ -312,7 +324,7 @@ python3 EvaluateWithSSIMLoss.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 #### 3.2.3.3. Đánh giá mô hình dự đoán với tất cả khung hình:
 
 Trường hợp này sẽ không bỏ sót những khung hình đầu tiên, thay vào đó sẽ dự đoán với tỉ lệ
-50% đúng và 50% sai
+50% đúng và 50% sai, từ đó đánh giá được mô hình gốc với tất cả khung hình.
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
@@ -323,6 +335,12 @@ python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 
 #### 3.2.3.4. Đánh giá mô hình dự đoán với tất cả khung hình (kết hợp với mô hình tái tạo):
 
+**Lưu ý:** Để thực hiện được phương thức này, trước tiên cần có mô hình tái tạo được huấn luyện.
+Cách huấn luyện tương tự như mục `3.1.2.1.` ở trên, tuy nhiên thay tham số `--method recon` và
+`t_length 1` (1 khung hình đầu vào và dùng chính khung hình đó để tái tạo)
+
+Đánh giá:
+
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
 
@@ -330,17 +348,29 @@ python3 EvaluatePredFullFrame.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 python3 EvaluateCombine.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 ```
 
+Ví dụ cho `avenue`:
+
+```
+python3 EvaluateCombine.py \
+--dataset_type avenue \
+--pred_model_dir ./pre_trained_model/defaults/avenue_prediction_model.pth \
+--pred_m_items_dir ./pre_trained_model/defaults/avenue_prediction_keys.pt \
+--recon_model_dir ./pre_trained_model/recon/avenue_reconstruction_model.pth \
+--recon_m_items_dir ./pre_trained_model/recon/avenue_reconstruction_keys.pt
+```
+
 #### 3.2.3.5. Đánh giá mô hình dự đoán với tất cả khung hình ở mức điểm ảnh:
 
-**Lưu ý:** Trước khi đánh giá mô hình ở mức điểm ảnh, cần cắc chắn rằng:
+**Lưu ý:** Trước khi đánh giá mô hình ở mức điểm ảnh, cần chắc chắn rằng:
 
--   Mô hình sử dụng là mô hình với tham số mặc định
+-   Mô hình sử dụng là mô hình với tham số mặc định (có thể thay đổi phần tử bộ nhớ hoặc số khung hình đầu vào
+    theo mong muốn)
 -   Có output của các khung hình dự đoán
 -   Có ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
 
 ##### a. Lấy output của khung hình dự đoán
 
-Bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
+Bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/<dataset_type>/output`
 trước khi chạy lưu khung hình dự đoán)
 
 ##### b. Lấy ảnh dị biệt khi so sánh giữa khung hình dự đoán và khung hình thực tế
@@ -370,9 +400,14 @@ python3 EvaluatePixelLevel.py --type_run evaluate --dataset_type ped2 # Đánh g
 
 ### 3.3.1. Cách chạy demo:
 
-**Lưu ý:** Cần phải có output khung hình của quá trình đánh giá trước khi chạy demo, để có được
-khung hình này, tiến hành bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
-trước khi chạy lưu khung hình dự đoán và mô hình dự đoán nên sử dụng là mô hình có tham số mặc định)
+**Lưu ý:**
+
+-   Cần phải có output khung hình dự đoán của quá trình đánh giá trước khi chạy demo, để có được
+    khung hình này, tiến hành bật cờ `is_save_output` trong quá trình đánh giá (nên xóa thư mục `./dataset/output/<dataset_type>`
+    trước khi chạy lưu khung hình dự đoán và mô hình dự đoán nên sử dụng là mô hình có tham số mặc định)
+-   Giá trị của tham số `t_length` phải trùng với mô hình huấn luyện dùng để xuất output của khung hình dự đoán.
+
+Đánh giá:
 
 -   Mở `terminal`, `cd` vào thư mục gốc chứa source code của khóa luận `anodetection-aemem`
 -   Chạy lệnh:
