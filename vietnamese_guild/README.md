@@ -204,7 +204,7 @@ python3 Train.py --tham_so_1 gia_tri_1 --tham_so_2 gia_tri_2
 Các tham số có thể điều chỉnh theo thay đổi mong muốn
 
 Ví dụ để huấn luyện mô hình cho tập dữ liệu `avenue`, phương thức dự đoán khung hình `pred`,
-10 phần tử bộ nhớ và 5 khung hình đầu (4 khung hình để dự đoán khung hình cuối) vào ta chạy lệnh:
+10 phần tử bộ nhớ và 5 khung hình đầu vào (4 khung hình để dự đoán khung hình cuối) vào ta chạy lệnh:
 
 ```
 python3 Train.py --dataset_type avenue --method pred --t_length 5 --msize 10
